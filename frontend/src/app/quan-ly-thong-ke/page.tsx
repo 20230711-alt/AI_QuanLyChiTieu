@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   PieChart,
   Pie,
@@ -20,51 +20,58 @@ type DanhMuc = {
   value: number;
 };
 
-export default function ThongKePage() {
-  const [thang, setThang] = useState("2026-04");
+const getCurrentMonth = () => {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  return `${now.getFullYear()}-${month}`;
+};
 
+export default function ThongKePage() {
+  const [thang, setThang] = useState(getCurrentMonth);
   const [tongThu, setTongThu] = useState(0);
   const [tongChi, setTongChi] = useState(0);
   const [soDu, setSoDu] = useState(0);
-
+  const [error, setError] = useState("");
   const [dataDanhMuc, setDataDanhMuc] = useState<DanhMuc[]>([]);
-  const [dataNgay, setDataNgay] = useState<any[]>([]);
+  const [dataNgay, setDataNgay] = useState<{ ngay: string; value: number }[]>([]);
 
   const format = (n: number) => n.toLocaleString("vi-VN");
 
-  // =========================
-  // LOAD DATA TỪ BACKEND
-  // =========================
   const load = async () => {
     try {
-      const res = await fetch(API + `?thang=${thang}`);
+      setError("");
+
+      const res = await fetch(`${API}?thang=${thang}&user_id=1`);
+      if (!res.ok) {
+        throw new Error(`Khong tai duoc thong ke (${res.status})`);
+      }
+
       const data = await res.json();
 
-      setTongThu(data.tong_thu || 0);
-      setTongChi(data.tong_chi || 0);
-      setSoDu(data.so_du || 0);
+      setTongThu(Number(data.tong_thu) || 0);
+      setTongChi(Number(data.tong_chi) || 0);
+      setSoDu(Number(data.so_du) || 0);
 
-      // 👉 danh mục → pie chart
-      const dm = Object.entries(data.chi_theo_danh_muc || {}).map(
-        ([k, v]: any) => ({
-          name: k,
-          value: v,
-        })
-      );
+      const dm = Object.entries(data.chi_theo_danh_muc || {}).map(([k, v]) => ({
+        name: k,
+        value: Number(v) || 0,
+      }));
+
+      const ngay = Object.entries(data.chi_theo_ngay || {}).map(([k, v]) => ({
+        ngay: `Ngay ${k}`,
+        value: Number(v) || 0,
+      }));
 
       setDataDanhMuc(dm);
-
-      // 👉 theo ngày → bar chart
-      const ngay = Object.entries(data.chi_theo_ngay || {}).map(
-        ([k, v]: any) => ({
-          ngay: `Ngày ${k}`,
-          value: v,
-        })
-      );
-
       setDataNgay(ngay);
     } catch (err) {
-      console.error("Lỗi:", err);
+      console.error("Lỗi thống kê:", err);
+      setError("Không tải được tài liệu thống kê.");
+      setTongThu(0);
+      setTongChi(0);
+      setSoDu(0);
+      setDataDanhMuc([]);
+      setDataNgay([]);
     }
   };
 
@@ -73,93 +80,83 @@ export default function ThongKePage() {
   }, [thang]);
 
   const total = tongThu + tongChi;
-
   const COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444"];
+  const topDanhMuc = [...dataDanhMuc].sort((a, b) => b.value - a.value)[0];
+  const formatShortMoney = (value: number) => {
+    if (value >= 1_000_000) {
+      return `${(value / 1_000_000).toFixed(value % 1_000_000 === 0 ? 0 : 1)}M`;
+    }
+
+    if (value >= 1_000) {
+      return `${(value / 1_000).toFixed(value % 1_000 === 0 ? 0 : 1)}K`;
+    }
+
+    return value.toString();
+  };
 
   return (
     <div className="space-y-6">
-
-      {/* HEADER */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-blue-600">
-          Thống kê tài chính
-        </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-blue-600">Thống kê tài chính</h1>
 
         <input
           type="month"
           value={thang}
           onChange={(e) => setThang(e.target.value)}
-          className="border p-2 rounded"
+          className="rounded border p-2"
         />
       </div>
 
-      {/* TỔNG */}
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-600">
+          {error}
+        </div>
+      )}
+
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-xl shadow">
+        <div className="rounded-xl bg-white p-4 shadow">
           <p>Tổng thu</p>
-          <h2 className="text-green-600 font-bold">
-            {format(tongThu)} đ
-          </h2>
+          <h2 className="font-bold text-green-600">{format(tongThu)} d</h2>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow">
+        <div className="rounded-xl bg-white p-4 shadow">
           <p>Tổng chi</p>
-          <h2 className="text-red-500 font-bold">
-            {format(tongChi)} đ
-          </h2>
+          <h2 className="font-bold text-red-500">{format(tongChi)} d</h2>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow">
+        <div className="rounded-xl bg-white p-4 shadow">
           <p>Số dư</p>
-          <h2 className="text-blue-600 font-bold">
-            {format(soDu)} đ
-          </h2>
+          <h2 className="font-bold text-blue-600">{format(soDu)} d</h2>
         </div>
       </div>
 
-      {/* THU VS CHI */}
-      <div className="bg-white p-4 rounded-xl shadow">
+      <div className="rounded-xl bg-white p-4 shadow">
         <h3 className="mb-2 font-semibold">Thu vs Chi</h3>
 
-        <div className="bg-gray-200 h-4 rounded">
+        <div className="h-4 rounded bg-gray-200">
           <div
-            className="bg-green-500 h-4 rounded"
-            style={{
-              width: total ? `${(tongThu / total) * 100}%` : "0%",
-            }}
-          ></div>
+            className="h-4 rounded bg-green-500"
+            style={{ width: total ? `${(tongThu / total) * 100}%` : "0%" }}
+          />
         </div>
 
-        <div className="bg-gray-200 h-4 rounded mt-2">
+        <div className="mt-2 h-4 rounded bg-gray-200">
           <div
-            className="bg-red-500 h-4 rounded"
-            style={{
-              width: total ? `${(tongChi / total) * 100}%` : "0%",
-            }}
-          ></div>
+            className="h-4 rounded bg-red-500"
+            style={{ width: total ? `${(tongChi / total) * 100}%` : "0%" }}
+          />
         </div>
       </div>
 
-      {/* CHART */}
       <div className="grid grid-cols-2 gap-4">
-
-        {/* PIE */}
-        <div className="bg-white p-4 rounded-xl shadow">
-          <h3 className="mb-2 font-semibold">Chi theo danh mục</h3>
+        <div className="rounded-xl bg-white p-4 shadow">
+          <h3 className="mb-2 font-semibold">Chi theo danh muc</h3>
 
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
-              <Pie
-                data={dataDanhMuc}
-                dataKey="value"
-                nameKey="name"
-                outerRadius={80}
-              >
+              <Pie data={dataDanhMuc} dataKey="value" nameKey="name" outerRadius={80}>
                 {dataDanhMuc.map((_, index) => (
-                  <Cell
-                    key={index}
-                    fill={COLORS[index % COLORS.length]}
-                  />
+                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip />
@@ -167,37 +164,31 @@ export default function ThongKePage() {
           </ResponsiveContainer>
         </div>
 
-        {/* BAR */}
-        <div className="bg-white p-4 rounded-xl shadow">
-          <h3 className="mb-2 font-semibold">Chi theo ngày</h3>
+        <div className="rounded-xl bg-white p-4 shadow">
+          <h3 className="mb-2 font-semibold">Chi theo ngay</h3>
 
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={dataNgay}>
+            <BarChart
+              data={dataNgay}
+              margin={{ top: 8, right: 12, left: 24, bottom: 0 }}
+            >
               <XAxis dataKey="ngay" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" />
+              <YAxis width={64} tickFormatter={formatShortMoney} />
+              <Tooltip formatter={(value: number | string) => format(Number(value))} />
+              <Bar dataKey="value" fill="#2563eb" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* PHÂN TÍCH */}
-      <div className="bg-white p-4 rounded-xl shadow">
+      <div className="rounded-xl bg-white p-4 shadow">
         <h3 className="font-semibold">Phân tích</h3>
-
-        {dataDanhMuc.length > 0 && (
+        {topDanhMuc && (
           <p>
-            Bạn chi nhiều nhất vào:{" "}
-            <b>
-              {
-                dataDanhMuc.sort((a, b) => b.value - a.value)[0].name
-              }
-            </b>
+            Bạn chi tiêu nhiều nhất vào: <b>{topDanhMuc.name}</b>
           </p>
         )}
       </div>
-
     </div>
   );
 }

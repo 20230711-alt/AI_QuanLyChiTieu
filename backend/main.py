@@ -9,6 +9,7 @@ from routers import users
 from routers import giaodich
 from routers import ngansach
 from routers import muctieu
+from routers import thongke
 app = FastAPI()
 
 # 👉 tạo bảng
@@ -17,6 +18,7 @@ app.include_router(users.router)
 app.include_router(giaodich.router)
 app.include_router(ngansach.router)
 app.include_router(muctieu.router)
+app.include_router(thongke.router)
 # 👉 CORS cho frontend
 app.add_middleware(
     CORSMiddleware,
