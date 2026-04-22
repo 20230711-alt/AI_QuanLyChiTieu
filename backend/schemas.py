@@ -1,0 +1,65 @@
+from pydantic import BaseModel
+from datetime import date
+from typing import Optional
+class UserLogin(BaseModel):
+    username: str
+    password: str
+    sdt: str | None = None
+    dia_chi: str | None = None
+
+class UserRegister(BaseModel):
+    username: str  
+    email: str
+    password: str
+    sdt: str | None = None
+    dia_chi: str | None = None
+
+
+class GiaoDichCreate(BaseModel):
+    user_id: int
+    loai: str
+    so_tien: float
+    danh_muc: str
+    mo_ta: str
+    ngay: date
+
+
+class GiaoDichOut(GiaoDichCreate):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
+class NganSachCreate(BaseModel):
+    ten: str
+    gioiHan: float
+    thang: str
+    ngay: Optional[str] = None
+
+# =====================================================
+#  THÊM MỤC TIÊU 
+# =====================================================
+
+#  tạo mục tiêu
+class MucTieuCreate(BaseModel):
+    ten: str
+    muc_tieu: float
+    deadline: Optional[str] = None
+
+
+# thêm tiền vào mục tiêu
+class ThemTien(BaseModel):
+    so_tien: float
+
+
+# response trả về frontend
+class MucTieuOut(BaseModel):
+    id: int
+    ten: str
+    muc_tieu: float
+    da_dat: float
+    deadline: date | None = None
+
+    class Config:
+        orm_mode = True
