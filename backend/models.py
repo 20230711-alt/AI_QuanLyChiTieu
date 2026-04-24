@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DECIMAL, Date, ForeignKey, Float, DateTime
+from sqlalchemy import Column, Integer, String, DECIMAL, Date, ForeignKey, Float, DateTime, Boolean
 from database import Base
 from datetime import datetime
 class User(Base):
@@ -39,4 +39,29 @@ class MucTieu(Base):
     da_dat = Column(Float, default=0)
     deadline = Column(Date)
     created_at = Column(DateTime, default=datetime.utcnow)
-    
+class ThongKe(Base):
+    __tablename__ = "thong_ke"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer)
+    thang = Column(String(7))  # yyyy-mm
+    tong_thu = Column(Float, default=0)
+    tong_chi = Column(Float, default=0)
+    so_du = Column(Float, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)   
+class NhacNho(Base):
+    __tablename__ = "nhac_nho"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer)
+    noi_dung = Column(String(255))
+    ngay = Column(Date)
+    lap_lai = Column(Boolean, default=False)
+    da_hoan_thanh = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    so_tien = Column(DECIMAL(15,2), default=0)
+    danh_muc = Column(String(50), default="Khác")
+    loai = Column(String(10), default="chi")
+
+    created_at = Column(DateTime, default=datetime.utcnow)

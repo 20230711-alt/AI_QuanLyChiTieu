@@ -35,7 +35,7 @@ class NganSachCreate(BaseModel):
     ten: str
     gioiHan: float
     thang: str
-    ngay: Optional[str] = None
+
 
 # =====================================================
 #  THÊM MỤC TIÊU 
@@ -63,3 +63,17 @@ class MucTieuOut(BaseModel):
 
     class Config:
         orm_mode = True
+class NhacNhoCreate(BaseModel):
+    noi_dung: str
+    ngay: date
+    lap_lai: bool = False
+
+class NhacNhoOut(BaseModel):
+    id: int
+    noi_dung: str
+    ngay: date
+    lap_lai: bool
+    da_hoan_thanh: bool
+
+    class Config:
+        from_attributes = True

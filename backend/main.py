@@ -10,16 +10,18 @@ from routers import giaodich
 from routers import ngansach
 from routers import muctieu
 from routers import thongke
+from routers import nhacnho
 app = FastAPI()
 
-# 👉 tạo bảng
+#  tạo bảng
 Base.metadata.create_all(bind=engine)
 app.include_router(users.router)
 app.include_router(giaodich.router)
 app.include_router(ngansach.router)
 app.include_router(muctieu.router)
 app.include_router(thongke.router)
-# 👉 CORS cho frontend
+app.include_router(nhacnho.router)
+#  CORS cho frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,7 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 👉 kết nối DB
+#  kết nối DB
 def get_db():
     db = SessionLocal()
     try:
@@ -38,7 +40,7 @@ def get_db():
 
 
 # ======================
-# 🏠 API test
+#  API test
 # ======================
 @app.get("/")
 def home():
@@ -46,7 +48,7 @@ def home():
 
 
 # ======================
-# 📝 ĐĂNG KÝ
+#  ĐĂNG KÝ
 # ======================
 @app.post("/register")
 def register(user: UserRegister, db: Session = Depends(get_db)):
@@ -68,7 +70,7 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
     return {"message": "Đăng ký thành công"}
 
 # ======================
-# 🔐 ĐĂNG NHẬP
+#  ĐĂNG NHẬP
 # ======================
 @app.post("/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
@@ -84,12 +86,12 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
             "role": db_user.role
             }
 # ======================
-# 👑 ADMIN - LẤY DANH SÁCH USER
+#  ADMIN - LẤY DANH SÁCH USER
 # ======================
 @app.get("/admin/users")
 def get_users(role: str, db: Session = Depends(get_db)):
     if role != "admin":
-        return {"message": "Không có quyền"}   # 🚫 chặn tại đây
+        return {"message": "Không có quyền"}   
 
     users = db.query(User).all()
     return users
