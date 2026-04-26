@@ -7,14 +7,17 @@ export default function Dashboard() {
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("");
 
-  // 👉 DATA
   const [tongThu, setTongThu] = useState(0);
   const [tongChi, setTongChi] = useState(0);
   const [gd, setGd] = useState<any[]>([]);
 
-  // 👉 THÊM CHO CHART + AI
   const [chartData, setChartData] = useState<any[]>([]);
   const [soDu, setSoDu] = useState(0);
+
+  // ✅ FORMAT TIỀN VND (THÊM)
+  const formatVND = (value: number) => {
+    return value.toLocaleString("vi-VN") + "đ";
+  };
 
   // =========================
   // LOAD USER
@@ -33,9 +36,6 @@ export default function Dashboard() {
   useEffect(() => {
     const load = async () => {
       try {
-        // =========================
-        // 👉 API CŨ (GIỮ NGUYÊN)
-        // =========================
         const res = await fetch("http://127.0.0.1:8000/giaodich?user_id=1");
         const data = await res.json();
 
@@ -55,7 +55,6 @@ export default function Dashboard() {
             const amount = Math.abs(i.so_tien);
             chi += amount;
 
-            // 👉 THÊM: gom theo danh mục (CHO CHART)
             const key = i.danh_muc || "Khác";
             if (!danhMuc[key]) danhMuc[key] = 0;
             danhMuc[key] += amount;
@@ -66,9 +65,7 @@ export default function Dashboard() {
         setTongChi(Math.abs(chi));
         setSoDu(thu - chi);
 
-        // =========================
-        // 👉 CHART DATA
-        // =========================
+        // 👉 CHART
         const chart = Object.entries(danhMuc).map(([key, value]) => ({
           name: key,
           value: value,
@@ -76,9 +73,7 @@ export default function Dashboard() {
 
         setChartData(chart);
 
-        // =========================
-        // 👉 GIAO DỊCH GẦN ĐÂY (GIỮ NGUYÊN)
-        // =========================
+        // 👉 GIAO DỊCH GẦN ĐÂY
         const sorted = [...data].sort(
           (a, b) =>
             new Date(b.ngay).getTime() - new Date(a.ngay).getTime()
@@ -119,24 +114,24 @@ export default function Dashboard() {
 
       {/* STATS */}
       <div className="grid grid-cols-3 gap-6">
-        <div className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition">
+        <div className="bg-white p-5 rounded-xl shadow">
           <p className="text-gray-500">Tổng chi</p>
           <h2 className="text-2xl font-bold text-red-500">
-            {tongChi.toLocaleString("vi-VN")}đ
+            {formatVND(tongChi)}
           </h2>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition">
+        <div className="bg-white p-5 rounded-xl shadow">
           <p className="text-gray-500">Thu nhập</p>
           <h2 className="text-2xl font-bold text-green-500">
-            {tongThu.toLocaleString("vi-VN")}đ
+            {formatVND(tongThu)}
           </h2>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition">
+        <div className="bg-white p-5 rounded-xl shadow">
           <p className="text-gray-500">Tiết kiệm</p>
           <h2 className="text-2xl font-bold text-blue-600">
-            {(tongThu - tongChi).toLocaleString("vi-VN")}đ
+            {formatVND(tongThu - tongChi)}
           </h2>
         </div>
       </div>
@@ -177,7 +172,7 @@ export default function Dashboard() {
                   }
                 >
                   {i.loai.toLowerCase() === "thu" ? "+" : "-"}
-                  {Math.abs(i.so_tien).toLocaleString("vi-VN")}đ
+                  {formatVND(Math.abs(i.so_tien))}
                 </span>
               </div>
             ))}
@@ -188,7 +183,6 @@ export default function Dashboard() {
       {/* CẢNH BÁO + AI */}
       <div className="grid grid-cols-2 gap-6">
 
-        {/* CẢNH BÁO */}
         <div className="bg-white p-5 rounded-xl shadow">
           <h2 className="font-semibold mb-2">⚠️ Cảnh báo</h2>
 
@@ -207,7 +201,6 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* AI */}
         <div className="bg-white p-5 rounded-xl shadow">
           <h2 className="font-semibold mb-2">🤖 AI gợi ý</h2>
 
