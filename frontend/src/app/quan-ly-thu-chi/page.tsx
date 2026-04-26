@@ -127,7 +127,7 @@ export default function ThuChiPage() {
 
       {/* HEADER */}
       <h1 className="text-2xl font-bold text-blue-600">
-        💰 Quản lý thu chi
+         Quản lý thu chi
       </h1>
 
       {/* STATS */}
@@ -244,7 +244,7 @@ export default function ThuChiPage() {
       </div>
 
       {/* LIST */}
-      <div className="bg-white rounded-xl shadow p-4 space-y-3">
+      <div className="bg-white rounded-xl shadow p-4 max-h-[450px] overflow-y-auto space-y-3 pr-2">
         {locDs.length === 0 ? (
           <p className="text-gray-400 text-center">
             📭 Chưa có giao dịch
