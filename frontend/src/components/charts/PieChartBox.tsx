@@ -1,0 +1,34 @@
+"use client";
+
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
+const COLORS = ["#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#8b5cf6"];
+
+export default function PieChartBox({ data }: any) {
+  return (
+    <div className="w-full h-[250px]">
+      <ResponsiveContainer>
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            outerRadius={90}
+            label
+          >
+            {data.map((_: any, index: number) => (
+              <Cell key={index} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
