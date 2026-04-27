@@ -152,7 +152,7 @@ export default function NganSachPage() {
       {/* HEADER */}
       <div className="flex justify-between items-center flex-wrap gap-3">
         <h1 className="text-2xl font-bold text-blue-600">
-          📊 Quản lý ngân sách
+           Quản lý ngân sách
         </h1>
 
         {/* 🔥 RANGE DATE STYLE ĐẸP */}

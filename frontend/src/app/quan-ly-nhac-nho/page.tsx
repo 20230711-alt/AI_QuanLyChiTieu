@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,7 +7,7 @@ type Reminder = {
   noi_dung: string;
   ngay: string;
   lap_lai: boolean;
-  da_hoan_thanh: boolean; // thêm mới
+  da_hoan_thanh: boolean;
 };
 
 export default function NhacNhoPage() {
@@ -19,9 +18,6 @@ export default function NhacNhoPage() {
 
   const API = "http://127.0.0.1:8000/nhacnho";
 
-  // =============================
-  // LOAD DATA
-  // =============================
   const fetchData = async () => {
     const res = await fetch(API);
     const data = await res.json();
@@ -32,9 +28,6 @@ export default function NhacNhoPage() {
     fetchData();
   }, []);
 
-  // =============================
-  // THÊM NHẮC NHỞ
-  // =============================
   const handleAdd = async () => {
     if (!noiDung || !ngay) return;
 
@@ -56,9 +49,6 @@ export default function NhacNhoPage() {
     fetchData();
   };
 
-  // =============================
-  // XÓA
-  // =============================
   const handleDelete = async (id: number) => {
     await fetch(`${API}/${id}`, {
       method: "DELETE",
@@ -66,9 +56,6 @@ export default function NhacNhoPage() {
     fetchData();
   };
 
-  // =============================
-  //  HOÀN THÀNH
-  // =============================
   const handleComplete = async (id: number) => {
     await fetch(`${API}/complete/${id}`, {
       method: "PUT",
@@ -76,20 +63,17 @@ export default function NhacNhoPage() {
     fetchData();
   };
 
-  // =============================
-  // NHẮC HÔM NAY
-  // =============================
   const today = new Date().toISOString().split("T")[0];
   const todayList = list.filter(
     (item) => item.ngay === today && !item.da_hoan_thanh
   );
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">⏰ Quản lý nhắc nhở</h1>
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold"> Quản lý nhắc nhở</h1>
 
       {/* FORM */}
-      <div className="flex gap-3 mb-6">
+      <div className="flex gap-3 flex-wrap bg-white p-4 rounded-xl shadow">
         <input
           className="border p-2 rounded w-1/3"
           placeholder="Nội dung (điện, trả nợ...)"
@@ -104,7 +88,7 @@ export default function NhacNhoPage() {
           onChange={(e) => setNgay(e.target.value)}
         />
 
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
             checked={lapLai}
@@ -115,14 +99,14 @@ export default function NhacNhoPage() {
 
         <button
           onClick={handleAdd}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
         >
           + Thêm
         </button>
       </div>
 
       {/* THÔNG BÁO */}
-      <div className="bg-yellow-100 p-4 rounded mb-6">
+      <div className="bg-yellow-100 text-yellow-800 p-4 rounded-xl shadow">
         <h2 className="font-semibold mb-2">🔔 Thông báo</h2>
         {todayList.length === 0 ? (
           <p>Không có nhắc hôm nay</p>
@@ -135,16 +119,18 @@ export default function NhacNhoPage() {
         )}
       </div>
 
-      {/* DANH SÁCH */}
+      {/* DANH SÁCH (SCROLLABLE) */}
       {list.length === 0 ? (
         <p>Chưa có nhắc nhở</p>
       ) : (
-        <div className="space-y-3">
+        <div className="bg-white rounded-xl shadow p-4 max-h-[400px] overflow-y-auto space-y-3 pr-2">
           {list.map((item) => (
             <div
               key={item.id}
-              className={`p-3 rounded border flex justify-between items-center ${
-                item.da_hoan_thanh ? "bg-gray-200 line-through" : ""
+              className={`flex justify-between items-center p-3 rounded-lg transition ${
+                item.da_hoan_thanh
+                  ? "bg-gray-200 line-through text-gray-400"
+                  : "hover:bg-gray-50"
               }`}
             >
               <div>
@@ -153,11 +139,11 @@ export default function NhacNhoPage() {
               </div>
 
               <div className="flex gap-2">
-                {/*  CHECK HOÀN THÀNH */}
+                {/* HOÀN THÀNH */}
                 {!item.da_hoan_thanh && (
                   <button
                     onClick={() => handleComplete(item.id)}
-                    className="bg-green-500 text-white px-3 py-1 rounded"
+                    className="bg-green-100 text-green-600 hover:bg-green-200 px-3 py-1 rounded"
                   >
                     ✔
                   </button>
@@ -166,7 +152,7 @@ export default function NhacNhoPage() {
                 {/* XÓA */}
                 <button
                   onClick={() => handleDelete(item.id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded"
+                  className="bg-red-100 text-red-500 hover:bg-red-200 px-3 py-1 rounded"
                 >
                   X
                 </button>
@@ -175,7 +161,17 @@ export default function NhacNhoPage() {
           ))}
         </div>
       )}
+
+      {/* SCROLL BAR ĐẸP */}
+      <style jsx>{`
+        ::-webkit-scrollbar {
+          width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 10px;
+        }
+      `}</style>
     </div>
   );
 }
-
