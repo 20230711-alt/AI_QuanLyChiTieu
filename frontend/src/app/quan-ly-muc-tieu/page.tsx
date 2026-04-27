@@ -113,7 +113,7 @@ export default function MucTieuPage() {
         });
       }
 
-      // ✅ kiểm tra lỗi backend
+      // kiểm tra lỗi backend
       if (!res.ok) {
         const text = await res.text();
         console.error("API lỗi:", text);
@@ -121,7 +121,7 @@ export default function MucTieuPage() {
         return;
       }
 
-      // ✅ reload chuẩn
+      //  reload chuẩn
       await load();
       await loadSoDu();
 

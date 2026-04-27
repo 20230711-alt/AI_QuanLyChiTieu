@@ -15,17 +15,74 @@ def get_db():
 
 # GET
 @router.get("/")
-def get_all(db: Session = Depends(get_db)):
+def get_all(
+    time: str = None,
+    mode: str = "month",
+
+    # ✅ THÊM RANGE DATE (KHÔNG PHÁ CŨ)
+    from_date: str = None,
+    to_date: str = None,
+
+    db: Session = Depends(get_db)
+):
     result = []
 
-    ns_list = db.query(models.NganSach).all()
+    # =========================
+    # 🔥 GIỮ NGUYÊN LOGIC CŨ
+    # =========================
+    if time and mode == "month":
+        ns_list = db.query(models.NganSach).filter(
+            models.NganSach.thang == time
+        ).all()
 
+    elif time and mode == "year":
+        ns_list = db.query(models.NganSach).filter(
+            models.NganSach.thang.startswith(time)
+        ).all()
+
+    else:
+        ns_list = db.query(models.NganSach).all()
+
+    # =========================
+    # 🔥 LOOP
+    # =========================
     for ns in ns_list:
-        tong_chi = db.query(func.sum(models.GiaoDich.so_tien))\
+
+        query = db.query(func.sum(models.GiaoDich.so_tien))\
             .filter(
                 models.GiaoDich.danh_muc == ns.danh_muc,
                 models.GiaoDich.loai == "chi"
-            ).scalar() or 0
+            )
+
+        # =========================
+        # 🔥 ƯU TIÊN RANGE DATE (NEW)
+        # =========================
+        if from_date and to_date:
+            query = query.filter(
+                models.GiaoDich.ngay >= from_date,
+                models.GiaoDich.ngay <= to_date
+            )
+
+        # =========================
+        # 🔥 LOGIC CŨ (GIỮ NGUYÊN)
+        # =========================
+        elif time:
+            if mode == "day":
+                query = query.filter(
+                    func.date(models.GiaoDich.ngay) == time
+                )
+
+            elif mode == "month":
+                query = query.filter(
+                    func.date_format(models.GiaoDich.ngay, "%Y-%m") == time
+                )
+
+            elif mode == "year":
+                query = query.filter(
+                    func.date_format(models.GiaoDich.ngay, "%Y") == time
+                )
+
+        tong_chi = query.scalar() or 0
 
         result.append({
             "id": ns.id,
@@ -36,7 +93,8 @@ def get_all(db: Session = Depends(get_db)):
 
     return result
 
-# POST
+
+# POST (GIỮ NGUYÊN)
 @router.post("/")
 def create(data: schemas.NganSachCreate, db: Session = Depends(get_db)):
     ns = models.NganSach(
@@ -51,7 +109,8 @@ def create(data: schemas.NganSachCreate, db: Session = Depends(get_db)):
     db.refresh(ns)
     return ns
 
-#  PUT (THÊM MỚI - KHÔNG ẢNH HƯỞNG LOGIC CŨ)
+
+# PUT (GIỮ NGUYÊN)
 @router.put("/{id}")
 def update(id: int, data: dict, db: Session = Depends(get_db)):
     ns = db.query(models.NganSach).filter(models.NganSach.id == id).first()
@@ -59,7 +118,6 @@ def update(id: int, data: dict, db: Session = Depends(get_db)):
     if not ns:
         return {"message": "Không tìm thấy"}
 
-    # giữ đúng field theo frontend
     ns.danh_muc = data["ten"]
     ns.gioi_han = data["gioiHan"]
 

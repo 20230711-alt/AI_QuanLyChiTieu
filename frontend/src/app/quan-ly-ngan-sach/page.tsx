@@ -19,15 +19,38 @@ export default function NganSachPage() {
   const [gioiHan, setGioiHan] = useState("");
   const [thang, setThang] = useState("2026-04");
 
-  //  THÊM STATE EDIT (NEW)
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  //  LOAD DỮ LIỆU
+  const [date, setDate] = useState("");
+  const [mode, setMode] = useState("month");
+
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
+  const [daysHaveData, setDaysHaveData] = useState<string[]>([]);
+
+  const getQuery = () => {
+    if (!date) return "";
+
+    if (mode === "day") return date;
+    if (mode === "month") return date.slice(0, 7);
+    if (mode === "year") return date.slice(0, 4);
+  };
+
+  // LOAD DATA
   useEffect(() => {
     const load = () => {
-      fetch("http://127.0.0.1:8000/ngansach")
-        .then(res => res.json())
-        .then(data => {
+      const query = getQuery();
+
+      fetch(
+        fromDate && toDate
+          ? `http://127.0.0.1:8000/ngansach?from_date=${fromDate}&to_date=${toDate}`
+          : query
+          ? `http://127.0.0.1:8000/ngansach?time=${query}&mode=${mode}`
+          : "http://127.0.0.1:8000/ngansach"
+      )
+        .then((res) => res.json())
+        .then((data) => {
           if (!Array.isArray(data)) return;
 
           const mapped = data.map((i: any) => ({
@@ -48,76 +71,72 @@ export default function NganSachPage() {
     return () => {
       window.removeEventListener("reload-ngansach", load);
     };
+  }, [date, mode, fromDate, toDate]);
+
+  // LOAD NGÀY CÓ CHI TIÊU
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/giaodich?user_id=1")
+      .then((res) => res.json())
+      .then((data) => {
+        const days = data.map((i: any) => i.ngay);
+        setDaysHaveData(days);
+      });
   }, []);
 
-  //  THÊM + UPDATE
+  // QUICK FILTER
+  const setToday = () => {
+    const today = new Date().toISOString().split("T")[0];
+    setFromDate(today);
+    setToDate(today);
+  };
+
+  const setWeek = () => {
+    const now = new Date();
+    const first = new Date(now.setDate(now.getDate() - now.getDay()));
+    const last = new Date(now.setDate(first.getDate() + 6));
+
+    setFromDate(first.toISOString().split("T")[0]);
+    setToDate(last.toISOString().split("T")[0]);
+  };
+
+  const setMonth = () => {
+    const now = new Date();
+    const first = new Date(now.getFullYear(), now.getMonth(), 1);
+    const last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    setFromDate(first.toISOString().split("T")[0]);
+    setToDate(last.toISOString().split("T")[0]);
+  };
+
   const them = async () => {
     if (!ten || !gioiHan) return;
 
     const parsed = Number(gioiHan.replace(/\./g, ""));
 
     try {
-      //  nếu đang sửa
       if (editingId !== null) {
         await fetch(`http://127.0.0.1:8000/ngansach/${editingId}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ten,
-            gioiHan: parsed,
-            thang,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ten, gioiHan: parsed, thang }),
         });
       } else {
-        //  thêm mới (giữ nguyên logic)
         await fetch("http://127.0.0.1:8000/ngansach", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ten,
-            gioiHan: parsed,
-            thang,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ten, gioiHan: parsed, thang }),
         });
       }
 
-      //  reload lại DB (giữ nguyên cách bạn đang làm)
-      const res = await fetch("http://127.0.0.1:8000/ngansach");
-      const data = await res.json();
-
-      if (Array.isArray(data)) {
-        const mapped = data.map((i: any) => ({
-          id: i.id,
-          ten: i.danh_muc,
-          gioiHan: i.gioi_han,
-          daDung: i.da_dung
-        }));
-        setDs(mapped);
-      }
-    window.dispatchEvent(new Event("reload-home"));
+      window.dispatchEvent(new Event("reload-ngansach"));
+      window.dispatchEvent(new Event("reload-home"));
     } catch (err) {
       console.error("Lỗi:", err);
-
-      // fallback giữ nguyên
-      setDs([
-        ...ds,
-        {
-          id: Date.now(),
-          ten,
-          gioiHan: parsed,
-          daDung: 0,
-        },
-      ]);
     }
 
-    // reset form
     setTen("");
     setGioiHan("");
-    setEditingId(null); // 
+    setEditingId(null);
   };
 
   const xoa = (id: number) => {
@@ -131,20 +150,52 @@ export default function NganSachPage() {
     <div className="space-y-6">
 
       {/* HEADER */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-3">
         <h1 className="text-2xl font-bold text-blue-600">
-           Quản lý ngân sách
+          📊 Quản lý ngân sách
         </h1>
 
-        <input
-          type="month"
-          value={thang}
-          onChange={(e) => setThang(e.target.value)}
-          className="border p-2 rounded"
-        />
+        {/* 🔥 RANGE DATE STYLE ĐẸP */}
+        <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl shadow">
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="border px-3 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-400"
+          />
+
+          <span className="text-gray-400 font-bold">→</span>
+
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="border px-3 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+
+        {/* QUICK FILTER */}
+        <div className="flex gap-2">
+          <button onClick={setToday} className="bg-gray-200 px-3 py-1 rounded">
+            Hôm nay
+          </button>
+          <button onClick={setWeek} className="bg-gray-200 px-3 py-1 rounded">
+            Tuần
+          </button>
+          <button onClick={setMonth} className="bg-gray-200 px-3 py-1 rounded">
+            Tháng
+          </button>
+        </div>
+
+        {/* HIGHLIGHT */}
+        {fromDate && daysHaveData.includes(fromDate) && (
+          <p className="text-green-600 text-sm">
+            📌 Có chi tiêu trong ngày
+          </p>
+        )}
       </div>
 
-      {/* TỔNG QUAN */}
+      {/* STATS */}
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-xl shadow">
           <p className="text-gray-500">Tổng ngân sách</p>
@@ -192,7 +243,7 @@ export default function NganSachPage() {
         </button>
       </div>
 
-      {/* DANH SÁCH */}
+      {/* LIST */}
       <div className="grid grid-cols-2 gap-4">
         {ds.map((i) => {
           const percent =
@@ -232,7 +283,6 @@ export default function NganSachPage() {
               )}
 
               <div className="flex gap-2 mt-3">
-                {/*  SỬA */}
                 <button
                   onClick={() => {
                     setTen(i.ten);

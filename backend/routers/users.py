@@ -5,7 +5,7 @@ import models
 
 router = APIRouter(prefix="/admin/users", tags=["Users"])
 
-# 🔌 Kết nối DB
+# Kết nối DB
 def get_db():
     db = SessionLocal()
     try:
@@ -13,14 +13,14 @@ def get_db():
     finally:
         db.close()
 
-# 📥 GET ALL USERS
+# GET ALL USERS
 @router.get("")
 def get_users(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
     return users
 
 
-# ➕ CREATE USER (FIX dấu /)
+# CREATE USER (FIX dấu /)
 @router.post("")   # ✅ bỏ "/" để khớp frontend
 def create_user(data: dict, db: Session = Depends(get_db)):
     user = models.User(
@@ -39,7 +39,7 @@ def create_user(data: dict, db: Session = Depends(get_db)):
     return {"message": "Thêm thành công"}
 
 
-# ✏️ UPDATE USER (FIX data.sdt)
+# UPDATE USER (FIX data.sdt)
 @router.put("/{user_id}")
 def update_user(user_id: int, data: dict, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
@@ -48,16 +48,16 @@ def update_user(user_id: int, data: dict, db: Session = Depends(get_db)):
         return {"message": "Không tìm thấy"}
 
     user.username = data["username"]
-    user.email = data["email"]           # ✅ thêm email
+    user.email = data["email"]           
     user.role = data["role"]
-    user.sdt = data["sdt"]               # ✅ fix
-    user.dia_chi = data["dia_chi"]       # ✅ fix
+    user.sdt = data["sdt"]               
+    user.dia_chi = data["dia_chi"]       
 
     db.commit()
     return {"message": "Cập nhật thành công"}
 
 
-# ❌ DELETE USER (giữ nguyên)
+#  DELETE USER 
 @router.delete("/{user_id}")
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()

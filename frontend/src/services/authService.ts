@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API = "http://127.0.0.1:8000"; // backend FastAPI
 
-// 🔐 LOGIN (dùng username)
+// LOGIN (dùng username)
 export const login = async (data: {
   username: string;
   password: string;
@@ -11,7 +11,7 @@ export const login = async (data: {
   return res.data;
 };
 
-// 📝 REGISTER (vẫn giữ email + name)
+// REGISTER (vẫn giữ email + name)
 export const register = async (data: {
   username: string;
   password: string;

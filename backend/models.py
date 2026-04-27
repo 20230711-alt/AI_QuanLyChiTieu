@@ -29,6 +29,7 @@ class NganSach(Base):
     danh_muc = Column(String(255))
     gioi_han = Column(Float)
     thang = Column(String(10))
+    da_dung = Column(Float, default=0)
 class MucTieu(Base):
     __tablename__ = "muc_tieu"
 

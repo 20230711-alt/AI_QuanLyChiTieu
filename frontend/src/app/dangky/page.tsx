@@ -13,13 +13,13 @@ export default function DangKyPage() {
   const [sdt, setSdt] = useState("");
   const [diaChi, setDiaChi] = useState("");
 
-  // ✅ THÊM ERROR
+  //  THÊM ERROR
   const [error, setError] = useState("");
 
   const handleRegister = async (e: any) => {
     e.preventDefault();
 
-    // 🔥 VALIDATE
+    //  VALIDATE
     if (!ten || !email || !matKhau || !sdt || !diaChi) {
       setError("⚠️ Vui lòng nhập đầy đủ thông tin!");
       return;
@@ -120,7 +120,7 @@ export default function DangKyPage() {
           TẠO TÀI KHOẢN
         </button>
 
-        {/* ✅ HIỂN THỊ LỖI */}
+        {/*  HIỂN THỊ LỖI */}
         {error && (
           <p className="text-red-500 text-sm mt-3 text-center">
             {error}
