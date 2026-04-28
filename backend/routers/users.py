@@ -15,53 +15,45 @@ def get_db():
 
 # GET ALL USERS
 @router.get("")
-def get_users(db: Session = Depends(get_db)):
-    users = db.query(models.User).all()
-    return users
+def get_users(role: str, db: Session = Depends(get_db)):
+    if role != "admin":
+        return {"message": "❌ Không có quyền"}
+    return db.query(models.User).all()
 
 
-# CREATE USER (FIX dấu /)
-@router.post("")   # ✅ bỏ "/" để khớp frontend
-def create_user(data: dict, db: Session = Depends(get_db)):
-    user = models.User(
-        username=data["username"],
-        password=data["password"],
-        email=data["email"],
-        role=data["role"],
-        sdt=data["sdt"],
-        dia_chi=data["dia_chi"],
-    )
+@router.post("")
+def create_user(data: dict, role: str, db: Session = Depends(get_db)):
+    if role != "admin":
+        return {"message": "❌ Không có quyền"}
 
+    user = models.User(**data)
     db.add(user)
     db.commit()
-    db.refresh(user)
-
     return {"message": "Thêm thành công"}
 
 
-# UPDATE USER (FIX data.sdt)
 @router.put("/{user_id}")
-def update_user(user_id: int, data: dict, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+def update_user(user_id: int, data: dict, role: str, db: Session = Depends(get_db)):
+    if role != "admin":
+        return {"message": "❌ Không có quyền"}
 
+    user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         return {"message": "Không tìm thấy"}
 
-    user.username = data["username"]
-    user.email = data["email"]           
-    user.role = data["role"]
-    user.sdt = data["sdt"]               
-    user.dia_chi = data["dia_chi"]       
+    for key, value in data.items():
+        setattr(user, key, value)
 
     db.commit()
     return {"message": "Cập nhật thành công"}
 
 
-#  DELETE USER 
 @router.delete("/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+def delete_user(user_id: int, role: str, db: Session = Depends(get_db)):
+    if role != "admin":
+        return {"message": "❌ Không có quyền"}
 
+    user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         return {"message": "Không tìm thấy"}
 

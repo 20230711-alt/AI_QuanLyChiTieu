@@ -20,7 +20,6 @@ export default function QuanLyUserPage() {
   const [editPhone, setEditPhone] = useState("");
   const [editAddress, setEditAddress] = useState("");
 
-  // ✅ thêm state lỗi
   const [error, setError] = useState("");
 
   const fetchUsers = async () => {
@@ -43,6 +42,15 @@ export default function QuanLyUserPage() {
   };
 
   useEffect(() => {
+    const role = localStorage.getItem("role");
+
+    // 🔥 CHẶN USER
+    if (role !== "admin") {
+      alert("❌ Bạn không có quyền truy cập!");
+      window.location.href = "/";
+      return;
+    }
+
     fetchUsers();
   }, []);
 
@@ -51,14 +59,21 @@ export default function QuanLyUserPage() {
     if (!ok) return;
 
     try {
-      await axios.delete(`http://127.0.0.1:8000/admin/users/${id}`);
+      const role = localStorage.getItem("role"); // 🔥 thêm
+
+      await axios.delete(
+        `http://127.0.0.1:8000/admin/users/${id}`,
+        {
+          params: { role }, // 🔥 thêm
+        }
+      );
+
       fetchUsers();
     } catch (err) {
       console.log("Lỗi xóa:", err);
     }
   };
 
-  // 🔥 HANDLE ADD (đã thêm validate)
   const handleAdd = async () => {
     if (!newUsername || !newEmail || !newPhone || !newAddress) {
       setError("⚠️ Vui lòng nhập đầy đủ thông tin!");
@@ -76,14 +91,22 @@ export default function QuanLyUserPage() {
     }
 
     try {
-      await axios.post("http://127.0.0.1:8000/admin/users", {
-        username: newUsername,
-        email: newEmail,
-        password: "123456",
-        role: newRole,
-        sdt: newPhone,
-        dia_chi: newAddress,
-      });
+      const role = localStorage.getItem("role"); // 🔥 thêm
+
+      await axios.post(
+        "http://127.0.0.1:8000/admin/users",
+        {
+          username: newUsername,
+          email: newEmail,
+          password: "123456",
+          role: newRole,
+          sdt: newPhone,
+          dia_chi: newAddress,
+        },
+        {
+          params: { role }, // 🔥 thêm
+        }
+      );
 
       fetchUsers();
       alert("Thêm người dùng thành công");
@@ -93,7 +116,7 @@ export default function QuanLyUserPage() {
       setNewEmail("");
       setNewPhone("");
       setNewAddress("");
-      setError(""); // clear lỗi
+      setError("");
     } catch (err) {
       console.log("Lỗi thêm:", err);
       setError("❌ Thêm thất bại!");
@@ -111,13 +134,21 @@ export default function QuanLyUserPage() {
 
   const handleSave = async (id: number) => {
     try {
-      await axios.put(`http://127.0.0.1:8000/admin/users/${id}`, {
-        username: editUsername,
-        email: editEmail,
-        role: editRole,
-        sdt: editPhone,
-        dia_chi: editAddress,
-      });
+      const role = localStorage.getItem("role"); // 🔥 thêm
+
+      await axios.put(
+        `http://127.0.0.1:8000/admin/users/${id}`,
+        {
+          username: editUsername,
+          email: editEmail,
+          role: editRole,
+          sdt: editPhone,
+          dia_chi: editAddress,
+        },
+        {
+          params: { role }, // 🔥 thêm
+        }
+      );
 
       fetchUsers();
       alert("Sửa người dùng thành công");
@@ -134,7 +165,6 @@ export default function QuanLyUserPage() {
         👤 Quản lý người dùng
       </h1>
 
-      {/* FORM */}
       <div className="mb-6 flex flex-wrap gap-2 items-center">
         <input
           placeholder="Tên đăng nhập"
@@ -189,14 +219,12 @@ export default function QuanLyUserPage() {
         </button>
       </div>
 
-      {/* ✅ HIỂN THỊ LỖI */}
       {error && (
         <div className="text-red-500 text-sm mb-4">
           {error}
         </div>
       )}
 
-      {/* TABLE */}
       <div className="bg-white rounded-2xl shadow overflow-hidden overflow-x-auto">
         
         <div className="grid grid-cols-[50px_130px_180px_100px_120px_160px_140px] px-4 py-2 bg-gray-200 text-sm font-semibold">
