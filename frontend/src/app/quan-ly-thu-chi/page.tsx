@@ -35,6 +35,14 @@ export default function ThuChiPage() {
 
   const [loading, setLoading] = useState(false);
   const isSubmitting = useRef(false);
+  const [notification, setNotification] = useState("");
+
+  const showNotification = (msg: string) => {
+    setNotification(msg);
+    setTimeout(() => {
+      setNotification("");
+    }, 3000);
+  };
 
   // LOAD DATA
   useEffect(() => {
@@ -100,6 +108,7 @@ export default function ThuChiPage() {
         moTa: "",
         ngay: "",
       });
+      showNotification("✅ Thêm giao dịch thành công!");
 
     } catch (err) {
       console.error("Lỗi thêm giao dịch:", err);
@@ -118,6 +127,7 @@ export default function ThuChiPage() {
   });
 
   setDs(ds.filter((i) => i.id !== id));
+  showNotification("✅ Xóa giao dịch thành công!");
 };
 
   const saveEdit = async () => {
@@ -153,6 +163,7 @@ export default function ThuChiPage() {
 
   setDs(mapped);
   setEditing(null);
+  showNotification("✅ Cập nhật giao dịch thành công!");
 };
 
   // STATS
@@ -185,7 +196,12 @@ export default function ThuChiPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {notification && (
+        <div className="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl z-50 font-semibold transition-all">
+          {notification}
+        </div>
+      )}
 
       <h1 className="text-2xl font-bold text-blue-600">
         Quản lý thu chi
