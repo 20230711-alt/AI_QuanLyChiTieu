@@ -13,15 +13,7 @@ from routers import thongke
 from routers import nhacnho
 app = FastAPI()
 
-#  tạo bảng
-Base.metadata.create_all(bind=engine)
-app.include_router(users.router)
-app.include_router(giaodich.router)
-app.include_router(ngansach.router)
-app.include_router(muctieu.router)
-app.include_router(thongke.router)
-app.include_router(nhacnho.router)
-#  CORS cho frontend
+# CORS middleware must be registered BEFORE routers
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,6 +21,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Create DB tables
+Base.metadata.create_all(bind=engine)
+
+# Include routers
+app.include_router(users.router)
+app.include_router(giaodich.router)
+app.include_router(ngansach.router)
+app.include_router(muctieu.router)
+app.include_router(thongke.router)
+app.include_router(nhacnho.router)
 
 #  kết nối DB
 def get_db():
@@ -95,3 +98,12 @@ def get_users(role: str, db: Session = Depends(get_db)):
 
     users = db.query(User).all()
     return users
+
+if __name__ == "__main__":
+    import uvicorn
+    import sys
+    # Force UTF-8 stdout to prevent UnicodeEncodeError on Windows (cp1252)
+    if sys.stdout.encoding != "utf-8":
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

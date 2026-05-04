@@ -59,10 +59,7 @@ class NhacNho(Base):
     ngay = Column(Date)
     lap_lai = Column(Boolean, default=False)
     da_hoan_thanh = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    so_tien = Column(DECIMAL(15,2), default=0)
+    so_tien = Column(DECIMAL(15, 2), default=0)
     danh_muc = Column(String(50), default="Khác")
     loai = Column(String(10), default="chi")
-
     created_at = Column(DateTime, default=datetime.utcnow)

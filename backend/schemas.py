@@ -28,7 +28,7 @@ class GiaoDichOut(GiaoDichCreate):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class NganSachCreate(BaseModel):
@@ -62,7 +62,7 @@ class MucTieuOut(BaseModel):
     deadline: date | None = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 class NhacNhoCreate(BaseModel):
     noi_dung: str
     ngay: date

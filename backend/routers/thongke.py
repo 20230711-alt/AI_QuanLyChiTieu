@@ -109,14 +109,8 @@ def get_thong_ke(
             day = i.ngay.day
             chi_theo_ngay[day] += float(i.so_tien or 0)
 
-    # =========================
-    # 👉 DEBUG (GIỮ NGUYÊN)
-    # =========================
-    print("===== DEBUG THONG KE =====")
-    print("Tháng:", thang)
-    print("Tổng record:", len(data))
-    print("Sau filter:", len(data_thang))
-    print("==========================")
+    # Debug log (ASCII-safe for Windows cp1252 encoding)
+    print(f"===== DEBUG THONG KE | thang={thang} | total={len(data)} | filtered={len(data_thang)} =====")
 
     # =========================
     # 👉 LƯU DB (GIỮ NGUYÊN)
