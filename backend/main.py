@@ -7,7 +7,7 @@ load_dotenv()
 
 from database import SessionLocal, engine
 from models import User, Base
-from schemas import UserLogin, UserRegister
+from schemas import UserLogin, UserRegister, UserProfileUpdate
 from routers import users
 from routers import giaodich
 from routers import ngansach
@@ -103,6 +103,42 @@ def get_users(role: str, db: Session = Depends(get_db)):
 
     users = db.query(User).all()
     return users
+
+# ======================
+#  QUẢN LÝ TÀI KHOẢN
+# ======================
+@app.get("/api/profile/{username}")
+def get_profile(username: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        return {"message": "Không tìm thấy người dùng"}
+    return {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "password": user.password,
+        "sdt": user.sdt,
+        "dia_chi": user.dia_chi,
+        "role": user.role
+    }
+
+@app.put("/api/profile/{username}")
+def update_profile(username: str, profile_data: UserProfileUpdate, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        return {"message": "Không tìm thấy người dùng"}
+    
+    if profile_data.email is not None:
+        user.email = profile_data.email
+    if profile_data.password is not None and profile_data.password != "":
+        user.password = profile_data.password
+    if profile_data.sdt is not None:
+        user.sdt = profile_data.sdt
+    if profile_data.dia_chi is not None:
+        user.dia_chi = profile_data.dia_chi
+
+    db.commit()
+    return {"message": "Cập nhật thành công"}
 
 if __name__ == "__main__":
     import uvicorn

@@ -14,6 +14,12 @@ class UserRegister(BaseModel):
     sdt: str | None = None
     dia_chi: str | None = None
 
+class UserProfileUpdate(BaseModel):
+    email: str | None = None
+    password: str | None = None
+    sdt: str | None = None
+    dia_chi: str | None = None
+
 
 class GiaoDichCreate(BaseModel):
     user_id: int

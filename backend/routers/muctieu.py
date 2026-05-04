@@ -62,9 +62,9 @@ def create(data: schemas.MucTieuCreate, db: Session = Depends(get_db)):
     return mt
 
 
-# =========================
-# 👉 THÊM TIỀN
-# =========================
+
+#  THÊM TIỀN
+
 @router.put("/{id}/them-tien")
 def them_tien(id: int, data: schemas.ThemTien, db: Session = Depends(get_db)):
     mt = db.query(models.MucTieu).filter(models.MucTieu.id == id).first()
@@ -78,10 +78,8 @@ def them_tien(id: int, data: schemas.ThemTien, db: Session = Depends(get_db)):
     db.refresh(mt)
     return mt
 
+#  UPDATE
 
-# =========================
-# 👉 UPDATE
-# =========================
 @router.put("/{id}")
 def update(id: int, data: schemas.MucTieuCreate, db: Session = Depends(get_db)):
     mt = db.query(models.MucTieu).filter(models.MucTieu.id == id).first()

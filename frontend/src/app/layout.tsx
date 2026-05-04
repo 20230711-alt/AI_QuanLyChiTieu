@@ -82,6 +82,11 @@ export default function RootLayout({
                    Quản lý nhắc nhở
                 </div>
 
+                <div onClick={() => router.push("/tai-khoan")}
+                  className="cursor-pointer px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition whitespace-nowrap">
+                   👤 Tài khoản của tôi
+                </div>
+
                 {/* 🔥 CHỈ ADMIN MỚI THẤY */}
                 {role === "admin" && (
                   <div
