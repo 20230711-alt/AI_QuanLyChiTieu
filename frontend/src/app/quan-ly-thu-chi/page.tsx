@@ -29,6 +29,8 @@ export default function ThuChiPage() {
 
   const [search, setSearch] = useState("");
   const [filterLoai, setFilterLoai] = useState("all");
+  const [filterThang, setFilterThang] = useState("");
+  const [filterDanhMuc, setFilterDanhMuc] = useState("all");
   const [sort, setSort] = useState("new");
 
   const [loading, setLoading] = useState(false);
@@ -166,10 +168,11 @@ export default function ThuChiPage() {
 
   // FILTER
   let locDs = ds.filter((i) => {
-    return (
-      (filterLoai === "all" || i.loai === filterLoai) &&
-      (i.moTa || "").toLowerCase().includes(search.toLowerCase())
-    );
+    const matchLoai = filterLoai === "all" || i.loai === filterLoai;
+    const matchSearch = (i.moTa || "").toLowerCase().includes(search.toLowerCase());
+    const matchThang = filterThang ? i.ngay.startsWith(filterThang) : true;
+    const matchDanhMuc = filterDanhMuc === "all" || i.danhMuc === filterDanhMuc;
+    return matchLoai && matchSearch && matchThang && matchDanhMuc;
   });
 
   // SORT
@@ -207,23 +210,52 @@ export default function ThuChiPage() {
       </div>
 
       {/* FILTER */}
-      <div className="bg-white p-4 rounded-xl shadow flex gap-3 flex-wrap">
+      <div className="bg-white p-4 rounded-xl shadow flex gap-3 flex-wrap items-center">
         <input
           placeholder="🔍 Tìm kiếm..."
+          value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="border p-2 rounded"
         />
 
         <select
+          value={filterLoai}
           onChange={(e) => setFilterLoai(e.target.value)}
           className="border p-2 rounded"
         >
-          <option value="all">Tất cả</option>
+          <option value="all">Tất cả loại</option>
           <option value="thu">Thu</option>
           <option value="chi">Chi</option>
         </select>
 
+        <input
+          type="month"
+          value={filterThang}
+          onChange={(e) => setFilterThang(e.target.value)}
+          className="border p-2 rounded"
+        />
+
         <select
+          value={filterDanhMuc}
+          onChange={(e) => setFilterDanhMuc(e.target.value)}
+          className="border p-2 rounded"
+        >
+          <option value="all">Tất cả danh mục</option>
+          <option value="Ăn uống">Ăn uống</option>
+          <option value="Đi lại">Đi lại</option>
+          <option value="Học tập">Học tập</option>
+          <option value="Mua sắm">Mua sắm</option>
+          <option value="Giải trí">Giải trí</option>
+          <option value="Sức khỏe">Sức khỏe</option>
+          <option value="Tiền nhà">Tiền nhà</option>
+          <option value="Hóa đơn">Hóa đơn</option>
+          <option value="Du lịch">Du lịch</option>
+          <option value="Tiền lương">Tiền lương</option>
+          <option value="Khác">Khác</option>
+        </select>
+
+        <select
+          value={sort}
           onChange={(e) => setSort(e.target.value)}
           className="border p-2 rounded"
         >
@@ -232,6 +264,19 @@ export default function ThuChiPage() {
           <option value="high">Tiền cao → thấp</option>
           <option value="low">Tiền thấp → cao</option>
         </select>
+
+        <button
+          onClick={() => {
+            setSearch("");
+            setFilterLoai("all");
+            setFilterThang("");
+            setFilterDanhMuc("all");
+            setSort("new");
+          }}
+          className="text-sm text-blue-500 hover:underline ml-2"
+        >
+          Xóa bộ lọc
+        </button>
       </div>
 
       {/* FORM */}

@@ -31,7 +31,6 @@ def create_user(data: dict, role: str, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Thêm thành công"}
 
-
 @router.put("/{user_id}")
 def update_user(user_id: int, data: dict, role: str, db: Session = Depends(get_db)):
     if role != "admin":
