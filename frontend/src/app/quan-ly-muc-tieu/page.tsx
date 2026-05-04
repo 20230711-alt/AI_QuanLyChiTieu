@@ -20,6 +20,14 @@ export default function MucTieuPage() {
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [soDu, setSoDu] = useState(0);
+  const [notification, setNotification] = useState("");
+
+  const showNotification = (msg: string) => {
+    setNotification(msg);
+    setTimeout(() => {
+      setNotification("");
+    }, 3000);
+  };
 
   // =========================
   // LOAD MỤC TIÊU
@@ -124,6 +132,7 @@ export default function MucTieuPage() {
       //  reload chuẩn
       await load();
       await loadSoDu();
+      showNotification(editingId ? "✅ Cập nhật mục tiêu thành công!" : "✅ Thêm mục tiêu thành công!");
 
     } catch (err) {
       console.error("Lỗi:", err);
@@ -158,6 +167,7 @@ export default function MucTieuPage() {
 
       await load();
       await loadSoDu();
+      showNotification("✅ Thêm tiền thành công!");
     } catch (err) {
       console.error("Lỗi thêm tiền:", err);
     }
@@ -179,6 +189,7 @@ export default function MucTieuPage() {
 
       await load();
       await loadSoDu();
+      showNotification("✅ Xoá mục tiêu thành công!");
     } catch (err) {
       console.error("Lỗi xoá:", err);
     }
@@ -187,7 +198,12 @@ export default function MucTieuPage() {
   const tong = ds.reduce((a, b) => a + b.mucTieu, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {notification && (
+        <div className="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl z-50 font-semibold transition-all">
+          {notification}
+        </div>
+      )}
 
       <h1 className="text-2xl font-bold text-blue-600">
         Quản lý mục tiêu

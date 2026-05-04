@@ -15,6 +15,14 @@ export default function NhacNhoPage() {
   const [ngay, setNgay] = useState("");
   const [lapLai, setLapLai] = useState(false);
   const [list, setList] = useState<Reminder[]>([]);
+  const [notification, setNotification] = useState("");
+
+  const showNotification = (msg: string) => {
+    setNotification(msg);
+    setTimeout(() => {
+      setNotification("");
+    }, 3000);
+  };
 
   const API = "http://127.0.0.1:8000/nhacnho";
 
@@ -47,6 +55,7 @@ export default function NhacNhoPage() {
     setNgay("");
     setLapLai(false);
     fetchData();
+    showNotification("✅ Thêm nhắc nhở thành công!");
   };
 
   const handleDelete = async (id: number) => {
@@ -54,6 +63,7 @@ export default function NhacNhoPage() {
       method: "DELETE",
     });
     fetchData();
+    showNotification("✅ Xóa nhắc nhở thành công!");
   };
 
   const handleComplete = async (id: number) => {
@@ -61,6 +71,7 @@ export default function NhacNhoPage() {
       method: "PUT",
     });
     fetchData();
+    showNotification("✅ Đã đánh dấu hoàn thành!");
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -69,7 +80,13 @@ export default function NhacNhoPage() {
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 relative">
+      {notification && (
+        <div className="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl z-50 font-semibold transition-all">
+          {notification}
+        </div>
+      )}
+
       <h1 className="text-2xl font-bold"> Quản lý nhắc nhở</h1>
 
       {/* FORM */}

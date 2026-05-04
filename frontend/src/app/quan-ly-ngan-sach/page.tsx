@@ -28,6 +28,14 @@ export default function NganSachPage() {
   const [toDate, setToDate] = useState("");
 
   const [daysHaveData, setDaysHaveData] = useState<string[]>([]);
+  const [notification, setNotification] = useState("");
+
+  const showNotification = (msg: string) => {
+    setNotification(msg);
+    setTimeout(() => {
+      setNotification("");
+    }, 3000);
+  };
 
   const getQuery = () => {
     if (!date) return "";
@@ -130,6 +138,7 @@ export default function NganSachPage() {
 
       window.dispatchEvent(new Event("reload-ngansach"));
       window.dispatchEvent(new Event("reload-home"));
+      showNotification(editingId ? "✅ Cập nhật ngân sách thành công!" : "✅ Thêm ngân sách thành công!");
     } catch (err) {
       console.error("Lỗi:", err);
     }
@@ -139,15 +148,29 @@ export default function NganSachPage() {
     setEditingId(null);
   };
 
-  const xoa = (id: number) => {
-    setDs(ds.filter((i) => i.id !== id));
+  const xoa = async (id: number) => {
+    const ok = confirm("Bạn có xác nhận xóa ngân sách không?");
+    if (!ok) return;
+
+    try {
+      await fetch(`http://127.0.0.1:8000/ngansach/${id}`, { method: "DELETE" });
+      setDs(ds.filter((i) => i.id !== id));
+      showNotification("✅ Xóa ngân sách thành công!");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const tong = ds.reduce((a, b) => a + b.gioiHan, 0);
   const daDung = ds.reduce((a, b) => a + b.daDung, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {notification && (
+        <div className="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl z-50 font-semibold transition-all">
+          {notification}
+        </div>
+      )}
 
       {/* HEADER */}
       <div className="flex justify-between items-center flex-wrap gap-3">

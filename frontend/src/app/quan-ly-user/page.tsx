@@ -21,6 +21,14 @@ export default function QuanLyUserPage() {
   const [editAddress, setEditAddress] = useState("");
 
   const [error, setError] = useState("");
+  const [notification, setNotification] = useState("");
+
+  const showNotification = (msg: string) => {
+    setNotification(msg);
+    setTimeout(() => {
+      setNotification("");
+    }, 3000);
+  };
 
   const fetchUsers = async () => {
     try {
@@ -69,6 +77,7 @@ export default function QuanLyUserPage() {
       );
 
       fetchUsers();
+      showNotification("✅ Xóa người dùng thành công!");
     } catch (err) {
       console.log("Lỗi xóa:", err);
     }
@@ -109,7 +118,7 @@ export default function QuanLyUserPage() {
       );
 
       fetchUsers();
-      alert("Thêm người dùng thành công");
+      showNotification("✅ Thêm người dùng thành công!");
 
       setNewUsername("");
       setNewRole("user");
@@ -151,7 +160,7 @@ export default function QuanLyUserPage() {
       );
 
       fetchUsers();
-      alert("Sửa người dùng thành công");
+      showNotification("✅ Sửa người dùng thành công!");
       setEditingId(null);
     } catch (err) {
       console.log("Lỗi sửa:", err);
@@ -159,8 +168,13 @@ export default function QuanLyUserPage() {
   };
 
   return (
-    <div className="p-6 min-h-screen bg-gradient-to-br from-purple-200 via-blue-100 to-purple-100 text-black">
-      
+    <div className="p-6 min-h-screen bg-gradient-to-br from-purple-200 via-blue-100 to-purple-100 text-black relative">
+      {notification && (
+        <div className="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl z-50 font-semibold transition-all">
+          {notification}
+        </div>
+      )}
+
       <h1 className="text-3xl font-bold mb-6">
         👤 Quản lý người dùng
       </h1>

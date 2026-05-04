@@ -209,21 +209,25 @@ export default function ThongKePage() {
       </div>
 
       {/* PROGRESS */}
-      <div className="rounded-xl bg-white p-4 shadow">
-        <h3 className="mb-2 font-semibold">Thu vs Chi</h3>
-
-        <div className="h-4 rounded bg-gray-200">
-          <div
-            className="h-4 rounded bg-green-500"
-            style={{ width: total ? `${(tongThu / total) * 100}%` : "0%" }}
-          />
+      <div className="rounded-xl bg-white p-4 shadow space-y-4">
+        <div className="flex items-center gap-4">
+          <span className="font-semibold text-green-600 w-8">Thu</span>
+          <div className="flex-1 h-4 rounded bg-gray-200 overflow-hidden">
+            <div
+              className="h-4 rounded bg-green-500 transition-all duration-500"
+              style={{ width: total ? `${(tongThu / total) * 100}%` : "0%" }}
+            />
+          </div>
         </div>
 
-        <div className="mt-2 h-4 rounded bg-gray-200">
-          <div
-            className="h-4 rounded bg-red-500"
-            style={{ width: total ? `${(tongChi / total) * 100}%` : "0%" }}
-          />
+        <div className="flex items-center gap-4">
+          <span className="font-semibold text-red-500 w-8">Chi</span>
+          <div className="flex-1 h-4 rounded bg-gray-200 overflow-hidden">
+            <div
+              className="h-4 rounded bg-red-500 transition-all duration-500"
+              style={{ width: total ? `${(tongChi / total) * 100}%` : "0%" }}
+            />
+          </div>
         </div>
       </div>
 
