@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy import extract
 
 import models
 from database import SessionLocal
@@ -35,16 +36,21 @@ class ChatRequest(BaseModel):
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 def _get_this_month_txns(user_id: int, db: Session) -> list:
-    """Lấy danh sách giao dịch trong tháng hiện tại của user."""
-    current_month = datetime.now().strftime("%Y-%m")
-    all_txns = db.query(models.GiaoDich).filter(models.GiaoDich.user_id == user_id).all()
-    return [t for t in all_txns if str(t.ngay).startswith(current_month)]
+    """Lấy dữ liệu từ tháng 3 đến hiện tại (GIỮ NGUYÊN LOGIC, chỉ đổi filter)."""
+    now = datetime.now()
+
+    return db.query(models.GiaoDich).filter(
+        models.GiaoDich.user_id == user_id,
+        models.GiaoDich.ngay >= datetime(now.year, 3, 1)  # ✅ từ tháng 3
+    ).all()
 
 
 def _collect_context(user_id: int, db: Session) -> dict:
     """Tổng hợp dữ liệu tài chính của user thành một dict để AI sử dụng."""
-    current_month = datetime.now().strftime("%Y-%m")
+    now = datetime.now()
+    current_month = f"03/{now.year} → nay"   # ✅ FIX hiển thị
     today = date.today()
+
     txns = _get_this_month_txns(user_id, db)
 
     # Tổng thu / chi / số dư / tỷ lệ tiết kiệm
@@ -58,17 +64,22 @@ def _collect_context(user_id: int, db: Session) -> dict:
     for t in txns:
         if t.loai == "chi":
             cat_totals[t.danh_muc or "Khác"] = cat_totals.get(t.danh_muc or "Khác", 0) + float(t.so_tien)
+
     top_categories = sorted(
         [{"name": k, "amount": v} for k, v in cat_totals.items()],
         key=lambda x: x["amount"], reverse=True
     )[:5]
 
-    # Ngân sách đã dùng >= 80% → đưa vào cảnh báo
+    # Ngân sách (GIỮ NGUYÊN theo tháng hiện tại)
     budgets = (
         db.query(models.NganSach)
-        .filter(models.NganSach.user_id == user_id, models.NganSach.thang == current_month)
+        .filter(
+            models.NganSach.user_id == user_id,
+            models.NganSach.thang == now.strftime("%Y-%m")
+        )
         .all()
     )
+
     budget_alerts = [
         {
             "category": b.danh_muc,
@@ -81,8 +92,9 @@ def _collect_context(user_id: int, db: Session) -> dict:
         and float(b.da_dung) / float(b.gioi_han) * 100 >= 80
     ]
 
-    # Mục tiêu tiết kiệm + tiến độ
+    # Mục tiêu
     goals = db.query(models.MucTieu).filter(models.MucTieu.user_id == user_id).all()
+
     goal_alerts = [
         {
             "name": g.ten,
@@ -107,14 +119,6 @@ def _collect_context(user_id: int, db: Session) -> dict:
 
 
 def _compute_health_score(ctx: dict) -> tuple[int, str]:
-    """
-    Tính điểm sức khỏe tài chính (0–100):
-      +30 nếu chi < thu
-      +25 nếu tỷ lệ tiết kiệm >= 20%
-      +25 nếu không có ngân sách nào > 90%
-      +20 nếu có ít nhất 1 mục tiêu
-      -10 mỗi ngân sách vượt 100%
-    """
     score = 0
     if ctx["total_income"] > 0 and ctx["balance"] >= 0:   score += 30
     if ctx["saving_rate"] >= 20:                           score += 25
@@ -128,78 +132,75 @@ def _compute_health_score(ctx: dict) -> tuple[int, str]:
 
 
 def _generate_insights(ctx: dict) -> list[dict]:
-    """Sinh danh sách nhận xét dựa trên rule — không dùng AI để đảm bảo tốc độ."""
     insights = []
 
-    # Chi vượt thu
     if ctx["total_income"] > 0 and ctx["total_expense"] > ctx["total_income"]:
         insights.append({
             "type": "warning", "priority": "urgent",
             "title": "Chi vượt thu nhập",
-            "description": f"Tháng này chi nhiều hơn thu {ctx['total_expense'] - ctx['total_income']:,.0f}đ. Cần cắt giảm ngay!",
+            "description": f"Bạn đang chi nhiều hơn thu {ctx['total_expense'] - ctx['total_income']:,.0f}đ.",
         })
 
-    # Cảnh báo ngân sách gần/đã cạn
     for a in ctx["budget_alerts"]:
         insights.append({
             "type": "warning",
             "priority": "urgent" if a["percent"] >= 100 else "medium",
             "title": f"Ngân sách '{a['category']}' {a['percent']}%",
-            "description": f"Đã dùng {a['used']:,.0f}đ / {a['limit']:,.0f}đ giới hạn tháng này.",
+            "description": f"Đã dùng {a['used']:,.0f}đ / {a['limit']:,.0f}đ.",
         })
 
-    # Mục tiêu sắp đến hạn mà tiến độ còn thấp
     for g in ctx["goal_alerts"]:
         if g["days_left"] is not None and g["days_left"] <= 30 and g["progress_pct"] < 80:
             insights.append({
                 "type": "suggestion", "priority": "medium",
                 "title": f"Mục tiêu '{g['name']}' sắp đến hạn",
-                "description": f"Còn {g['days_left']} ngày, tiến độ {g['progress_pct']}%. Cần tiết kiệm thêm để kịp deadline.",
+                "description": f"Còn {g['days_left']} ngày, tiến độ {g['progress_pct']}%.",
             })
 
-    # Tỷ lệ tiết kiệm tốt
     if ctx["saving_rate"] >= 20:
         insights.append({
             "type": "praise", "priority": "low",
-            "title": "Tuyệt vời! Tỷ lệ tiết kiệm tốt",
-            "description": f"Bạn đang tiết kiệm {ctx['saving_rate']}% thu nhập. Tiếp tục duy trì nhé!",
+            "title": "Tỷ lệ tiết kiệm tốt",
+            "description": f"Bạn đang tiết kiệm {ctx['saving_rate']}%.",
         })
 
-    # Gợi ý giảm danh mục tốn kém nhất
     if ctx["top_categories"]:
         top = ctx["top_categories"][0]
         insights.append({
             "type": "suggestion", "priority": "low",
-            "title": f"Danh mục chi nhiều nhất: {top['name']}",
-            "description": f"Bạn đã chi {top['amount']:,.0f}đ cho '{top['name']}' tháng này. Xem xét có thể giảm không?",
+            "title": f"Chi nhiều nhất: {top['name']}",
+            "description": f"{top['amount']:,.0f}đ",
         })
 
     return insights
 
 
-# ─── GET /ai/analyze ──────────────────────────────────────────────────────────
+# ─── API ──────────────────────────────────────────────────────────────────────
 @router.get("/analyze")
 def analyze(user_id: int, db: Session = Depends(get_db)):
-    """Trả về điểm sức khỏe tài chính + danh sách insight cho user."""
     ctx = _collect_context(user_id, db)
     health_score, health_label = _compute_health_score(ctx)
-    return {"health_score": health_score, "health_label": health_label, **ctx, "insights": _generate_insights(ctx)}
+
+    return {
+        "health_score": health_score,
+        "health_label": health_label,
+        **ctx,
+        "insights": _generate_insights(ctx)
+    }
 
 
-# ─── POST /ai/chat ────────────────────────────────────────────────────────────
 @router.post("/chat")
 def chat(body: ChatRequest, db: Session = Depends(get_db)):
-    """Gửi câu hỏi + dữ liệu tài chính thực của user lên Gemini, trả về lời khuyên."""
     ctx = _collect_context(body.user_id, db)
 
     system_prompt = f"""Bạn là trợ lý tài chính AI tên "FinBot". Trả lời ngắn gọn bằng tiếng Việt.
 
-DỮ LIỆU THÁNG {ctx['current_month']}:
+DỮ LIỆU TỪ THÁNG 3:
 - Thu: {ctx['total_income']:,.0f}đ | Chi: {ctx['total_expense']:,.0f}đ | Dư: {ctx['balance']:,.0f}đ
-- Tiết kiệm: {ctx['saving_rate']}% | Cảnh báo ngân sách: {len(ctx['budget_alerts'])} | Mục tiêu: {len(ctx['goal_alerts'])}
+- Tiết kiệm: {ctx['saving_rate']}% | Cảnh báo: {len(ctx['budget_alerts'])} | Mục tiêu: {len(ctx['goal_alerts'])}
 - Top chi: {', '.join(f"{c['name']} ({c['amount']:,.0f}đ)" for c in ctx['top_categories'][:3])}
 
-NGUYÊN TẮC: Tối đa 3-4 câu. Dùng số liệu thực. Kết thúc bằng 1 lời khuyên hành động cụ thể."""
+NGUYÊN TẮC: Tối đa 3-4 câu. Có số liệu. Kết thúc bằng 1 lời khuyên."""
 
     try:
         response = _genai_client.models.generate_content(
