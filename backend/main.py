@@ -1,6 +1,9 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from database import SessionLocal, engine
 from models import User, Base
@@ -11,6 +14,7 @@ from routers import ngansach
 from routers import muctieu
 from routers import thongke
 from routers import nhacnho
+from routers import ai
 app = FastAPI()
 
 # CORS middleware must be registered BEFORE routers
@@ -32,6 +36,7 @@ app.include_router(ngansach.router)
 app.include_router(muctieu.router)
 app.include_router(thongke.router)
 app.include_router(nhacnho.router)
+app.include_router(ai.router)
 
 #  kết nối DB
 def get_db():
