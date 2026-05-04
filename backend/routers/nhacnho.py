@@ -9,7 +9,6 @@ from schemas import NhacNhoCreate
 
 router = APIRouter(prefix="/nhacnho", tags=["Nhắc nhở"])
 
-# Dependency
 def get_db():
     db = SessionLocal()
     try:
@@ -17,9 +16,7 @@ def get_db():
     finally:
         db.close()
 
-# =============================
 #  1. Tạo nhắc nhở
-# =============================
 @router.post("/")
 def create_reminder(data: NhacNhoCreate, db: Session = Depends(get_db)):
     new_item = NhacNho(
@@ -33,24 +30,18 @@ def create_reminder(data: NhacNhoCreate, db: Session = Depends(get_db)):
     db.refresh(new_item)
     return new_item
 
-# =============================
 #  2. Lấy tất cả
-# =============================
 @router.get("/")
 def get_all(db: Session = Depends(get_db)):
     return db.query(NhacNho).order_by(NhacNho.ngay).all()
 
-# =============================
 #  3. Nhắc hôm nay
-# =============================
 @router.get("/today")
 def get_today(db: Session = Depends(get_db)):
     today = date.today()
     return db.query(NhacNho).filter(NhacNho.ngay == today).all()
 
-# =============================
 #  4. Nhắc sắp tới (3 ngày)
-# =============================
 @router.get("/upcoming")
 def upcoming(db: Session = Depends(get_db)):
     today = date.today()
@@ -59,9 +50,7 @@ def upcoming(db: Session = Depends(get_db)):
         NhacNho.ngay.between(today, future)
     ).all()
 
-# =============================
 #  5. Đánh dấu hoàn thành
-# =============================
 from models import NhacNho, GiaoDich, NganSach
 
 @router.put("/complete/{id}")
@@ -75,10 +64,10 @@ def complete(id: int, db: Session = Depends(get_db)):
     if item.da_hoan_thanh:
         return {"msg": "Đã hoàn thành trước đó"}
 
-    # ✅ đánh dấu hoàn thành
+    #  đánh dấu hoàn thành
     item.da_hoan_thanh = True
 
-    # 🔥 TẠO GIAO DỊCH (DÙNG LOGIC CỦA BẠN)
+    # TẠO GIAO DỊCH 
     gd = GiaoDich(
         user_id=item.user_id,
         loai=item.loai,
@@ -92,7 +81,7 @@ def complete(id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(gd)
 
-    #  GỌI LẠI LOGIC NGÂN SÁCH (copy từ router giao dịch)
+    #  GỌI LẠI LOGIC NGÂN SÁCH 
     if item.loai.lower() == "chi":
 
         danh_muc = (item.danh_muc or "Khác").strip()
@@ -122,9 +111,7 @@ def complete(id: int, db: Session = Depends(get_db)):
         "giao_dich_id": gd.id
     }
 
-# =============================
 #  6. Xử lý lặp hàng tháng
-# =============================
 @router.put("/repeat-update")
 def update_repeat(db: Session = Depends(get_db)):
     today = date.today()
@@ -139,9 +126,7 @@ def update_repeat(db: Session = Depends(get_db)):
     db.commit()
     return {"msg": "Updated repeat reminders"}
 
-# =============================
 #  7. Xóa
-# =============================
 @router.delete("/{id}")
 def delete(id: int, db: Session = Depends(get_db)):
     item = db.query(NhacNho).get(id)

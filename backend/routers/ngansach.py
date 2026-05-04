@@ -19,7 +19,6 @@ def get_all(
     time: str = None,
     mode: str = "month",
 
-    # ✅ THÊM RANGE DATE (KHÔNG PHÁ CŨ)
     from_date: str = None,
     to_date: str = None,
 
@@ -27,9 +26,6 @@ def get_all(
 ):
     result = []
 
-    # =========================
-    # 🔥 GIỮ NGUYÊN LOGIC CŨ
-    # =========================
     if time and mode == "month":
         ns_list = db.query(models.NganSach).filter(
             models.NganSach.thang == time
@@ -43,9 +39,6 @@ def get_all(
     else:
         ns_list = db.query(models.NganSach).all()
 
-    # =========================
-    # 🔥 LOOP
-    # =========================
     for ns in ns_list:
 
         query = db.query(func.sum(models.GiaoDich.so_tien))\
@@ -54,18 +47,12 @@ def get_all(
                 models.GiaoDich.loai == "chi"
             )
 
-        # =========================
-        # 🔥 ƯU TIÊN RANGE DATE (NEW)
-        # =========================
         if from_date and to_date:
             query = query.filter(
                 models.GiaoDich.ngay >= from_date,
                 models.GiaoDich.ngay <= to_date
             )
 
-        # =========================
-        # 🔥 LOGIC CŨ (GIỮ NGUYÊN)
-        # =========================
         elif time:
             if mode == "day":
                 query = query.filter(
@@ -93,8 +80,6 @@ def get_all(
 
     return result
 
-
-# POST (GIỮ NGUYÊN)
 @router.post("/")
 def create(data: schemas.NganSachCreate, db: Session = Depends(get_db)):
     ns = models.NganSach(
@@ -109,8 +94,6 @@ def create(data: schemas.NganSachCreate, db: Session = Depends(get_db)):
     db.refresh(ns)
     return ns
 
-
-# PUT (GIỮ NGUYÊN)
 @router.put("/{id}")
 def update(id: int, data: dict, db: Session = Depends(get_db)):
     ns = db.query(models.NganSach).filter(models.NganSach.id == id).first()

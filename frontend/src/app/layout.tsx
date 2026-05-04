@@ -20,7 +20,7 @@ export default function RootLayout({
 
     if (r) setRole(r);
 
-    // 🚫 chưa login thì về trang đăng nhập
+    //  chưa login thì về trang đăng nhập
     if (!isLogin && pathname !== "/dangnhap" && pathname !== "/dangky") {
       router.push("/dangnhap");
     }
@@ -87,7 +87,7 @@ export default function RootLayout({
                    👤 Tài khoản của tôi
                 </div>
 
-                {/* 🔥 CHỈ ADMIN MỚI THẤY */}
+                {/*  CHỈ ADMIN MỚI THẤY */}
                 {role === "admin" && (
                   <div
                     onClick={() => router.push("/quan-ly-user")}

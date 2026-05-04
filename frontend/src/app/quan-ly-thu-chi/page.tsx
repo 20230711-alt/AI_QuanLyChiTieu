@@ -78,7 +78,7 @@ export default function ThuChiPage() {
         },
         body: JSON.stringify({
           user_id: 1,
-          loai: form.loai, // ✅ FIX: dùng trực tiếp
+          loai: form.loai,
           so_tien: Number(form.soTien),
           danh_muc: form.danhMuc,
           mo_ta: form.moTa,
@@ -148,7 +148,7 @@ export default function ThuChiPage() {
     }),
   });
 
-  // reload lại từ server cho chắc
+  // reload lại từ server 
   const res = await fetch("http://127.0.0.1:8000/giaodich/?user_id=1");
   const data = await res.json();
 
@@ -298,7 +298,7 @@ export default function ThuChiPage() {
       {/* FORM */}
       <div className="bg-white p-4 rounded-xl shadow flex gap-3 flex-wrap">
         <select
-          value={form.loai} // ✅ FIX QUAN TRỌNG
+          value={form.loai} 
           onChange={(e) =>
             setForm({ ...form, loai: e.target.value })
           }
@@ -363,7 +363,7 @@ export default function ThuChiPage() {
         </button>
       </div>
 
-      {/* LIST giữ nguyên */}
+      {/* LIST  */}
       <div className="bg-white rounded-xl shadow p-4 max-h-[450px] overflow-y-auto space-y-3 pr-2">
         {locDs.length === 0 ? (
           <p className="text-gray-400 text-center">
@@ -409,7 +409,7 @@ export default function ThuChiPage() {
         )}
       </div>
 
-      {/* MODAL giữ nguyên */}
+      {/* MODAL  */}
       {editing && (
   <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
     <div className="bg-white p-6 rounded-xl space-y-3 w-80">

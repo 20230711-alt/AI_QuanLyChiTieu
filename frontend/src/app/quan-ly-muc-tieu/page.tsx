@@ -10,7 +10,7 @@ type MucTieu = {
   han: string;
 };
 
-const API = "http://127.0.0.1:8000/muctieu/"; // ✅ chuẩn hoá URL
+const API = "http://127.0.0.1:8000/muctieu/"; //  chuẩn hoá URL
 
 export default function MucTieuPage() {
   const [ds, setDs] = useState<MucTieu[]>([]);
@@ -29,9 +29,7 @@ export default function MucTieuPage() {
     }, 3000);
   };
 
-  // =========================
   // LOAD MỤC TIÊU
-  // =========================
   const load = async () => {
     try {
       const res = await fetch(API);
@@ -63,9 +61,7 @@ export default function MucTieuPage() {
     load();
   }, []);
 
-  // =========================
   // LOAD SỐ DƯ
-  // =========================
   const loadSoDu = async () => {
     try {
       const res = await fetch(API + "so-du");
@@ -86,9 +82,7 @@ export default function MucTieuPage() {
     loadSoDu();
   }, []);
 
-  // =========================
   // THÊM / UPDATE
-  // =========================
   const them = async () => {
     if (!ten || !soTien) {
       alert("Vui lòng nhập đầy đủ");
@@ -144,9 +138,7 @@ export default function MucTieuPage() {
     setEditingId(null);
   };
 
-  // =========================
   // THÊM TIỀN
-  // =========================
   const themTien = async (id: number) => {
     const tien = prompt("Nhập số tiền thêm:");
     if (!tien) return;
@@ -173,9 +165,7 @@ export default function MucTieuPage() {
     }
   };
 
-  // =========================
   // XOÁ
-  // =========================
   const xoa = async (id: number) => {
     try {
       const res = await fetch(`${API}${id}`, {

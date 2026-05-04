@@ -179,7 +179,7 @@ export default function NhacNhoPage() {
         </div>
       )}
 
-      {/* SCROLL BAR ĐẸP */}
+      {/* SCROLL BAR  */}
       <style jsx>{`
         ::-webkit-scrollbar {
           width: 6px;

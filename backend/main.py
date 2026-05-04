@@ -17,7 +17,6 @@ from routers import nhacnho
 from routers import ai
 app = FastAPI()
 
-# CORS middleware must be registered BEFORE routers
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,10 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create DB tables
 Base.metadata.create_all(bind=engine)
 
-# Include routers
 app.include_router(users.router)
 app.include_router(giaodich.router)
 app.include_router(ngansach.router)
@@ -47,17 +44,12 @@ def get_db():
         db.close()
 
 
-# ======================
 #  API test
-# ======================
 @app.get("/")
 def home():
     return {"message": "API đang chạy"}
 
-
-# ======================
 #  ĐĂNG KÝ
-# ======================
 @app.post("/register")
 def register(user: UserRegister, db: Session = Depends(get_db)):
     exist = db.query(User).filter(User.email == user.email).first()
@@ -77,9 +69,7 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
 
     return {"message": "Đăng ký thành công"}
 
-# ======================
 #  ĐĂNG NHẬP
-# ======================
 @app.post("/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
@@ -93,9 +83,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     return {"message": "Đăng nhập thành công",
             "role": db_user.role
             }
-# ======================
 #  ADMIN - LẤY DANH SÁCH USER
-# ======================
 @app.get("/admin/users")
 def get_users(role: str, db: Session = Depends(get_db)):
     if role != "admin":
@@ -104,9 +92,7 @@ def get_users(role: str, db: Session = Depends(get_db)):
     users = db.query(User).all()
     return users
 
-# ======================
 #  QUẢN LÝ TÀI KHOẢN
-# ======================
 @app.get("/api/profile/{username}")
 def get_profile(username: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == username).first()
@@ -143,7 +129,6 @@ def update_profile(username: str, profile_data: UserProfileUpdate, db: Session =
 if __name__ == "__main__":
     import uvicorn
     import sys
-    # Force UTF-8 stdout to prevent UnicodeEncodeError on Windows (cp1252)
     if sys.stdout.encoding != "utf-8":
         sys.stdout.reconfigure(encoding="utf-8")
         sys.stderr.reconfigure(encoding="utf-8")

@@ -178,7 +178,7 @@ export default function NganSachPage() {
            Quản lý ngân sách
         </h1>
 
-        {/* 🔥 RANGE DATE STYLE ĐẸP */}
+        {/*  RANGE DATE STYLE  */}
         <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl shadow">
           <input
             type="date"

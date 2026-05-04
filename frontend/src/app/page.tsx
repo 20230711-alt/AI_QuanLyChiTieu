@@ -14,14 +14,12 @@ export default function Dashboard() {
   const [chartData, setChartData] = useState<any[]>([]);
   const [soDu, setSoDu] = useState(0);
 
-  // ✅ FORMAT TIỀN VND (THÊM)
+  //  FORMAT TIỀN VND 
   const formatVND = (value: number) => {
     return value.toLocaleString("vi-VN") + "đ";
   };
 
-  // =========================
   // LOAD USER
-  // =========================
   useEffect(() => {
     const u = localStorage.getItem("username");
     const r = localStorage.getItem("role");
@@ -30,9 +28,7 @@ export default function Dashboard() {
     if (r) setRole(r);
   }, []);
 
-  // =========================
   // LOAD DATA
-  // =========================
   useEffect(() => {
     const load = async () => {
       try {
@@ -65,7 +61,7 @@ export default function Dashboard() {
         setTongChi(Math.abs(chi));
         setSoDu(thu - chi);
 
-        // 👉 CHART
+        //  CHART
         const chart = Object.entries(danhMuc).map(([key, value]) => ({
           name: key,
           value: value,
@@ -73,7 +69,7 @@ export default function Dashboard() {
 
         setChartData(chart);
 
-        // 👉 GIAO DỊCH GẦN ĐÂY
+        //  GIAO DỊCH GẦN ĐÂY
         const sorted = [...data].sort(
           (a, b) =>
             new Date(b.ngay).getTime() - new Date(a.ngay).getTime()

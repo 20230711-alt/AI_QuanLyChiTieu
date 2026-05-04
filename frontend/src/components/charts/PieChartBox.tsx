@@ -10,7 +10,7 @@ import {
 
 const COLORS = ["#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#8b5cf6"];
 
-// ✅ FORMAT TIỀN
+//  FORMAT TIỀN
 const formatVND = (value: number) => {
   return value.toLocaleString("vi-VN") + "đ";
 };
@@ -26,7 +26,6 @@ export default function PieChartBox({ data }: any) {
             nameKey="name"
             outerRadius={90}
 
-            // 🔥 FIX CHÍNH Ở ĐÂY
             label={({ value }) => formatVND(value)}
           >
             {data.map((_: any, index: number) => (
@@ -34,7 +33,6 @@ export default function PieChartBox({ data }: any) {
             ))}
           </Pie>
 
-          {/* 🔥 FIX TOOLTIP */}
           <Tooltip formatter={(value) => formatVND(value as number)} />
         </PieChart>
       </ResponsiveContainer>

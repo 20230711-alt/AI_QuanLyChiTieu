@@ -52,7 +52,7 @@ export default function QuanLyUserPage() {
   useEffect(() => {
     const role = localStorage.getItem("role");
 
-    // 🔥 CHẶN USER
+    //  CHẶN USER
     if (role !== "admin") {
       alert("❌ Bạn không có quyền truy cập!");
       window.location.href = "/";
@@ -67,12 +67,12 @@ export default function QuanLyUserPage() {
     if (!ok) return;
 
     try {
-      const role = localStorage.getItem("role"); // 🔥 thêm
+      const role = localStorage.getItem("role"); 
 
       await axios.delete(
         `http://127.0.0.1:8000/admin/users/${id}`,
         {
-          params: { role }, // 🔥 thêm
+          params: { role }, 
         }
       );
 
@@ -100,7 +100,7 @@ export default function QuanLyUserPage() {
     }
 
     try {
-      const role = localStorage.getItem("role"); // 🔥 thêm
+      const role = localStorage.getItem("role"); 
 
       await axios.post(
         "http://127.0.0.1:8000/admin/users",
@@ -113,7 +113,7 @@ export default function QuanLyUserPage() {
           dia_chi: newAddress,
         },
         {
-          params: { role }, // 🔥 thêm
+          params: { role }, 
         }
       );
 
@@ -143,7 +143,7 @@ export default function QuanLyUserPage() {
 
   const handleSave = async (id: number) => {
     try {
-      const role = localStorage.getItem("role"); // 🔥 thêm
+      const role = localStorage.getItem("role"); 
 
       await axios.put(
         `http://127.0.0.1:8000/admin/users/${id}`,
@@ -155,7 +155,7 @@ export default function QuanLyUserPage() {
           dia_chi: editAddress,
         },
         {
-          params: { role }, // 🔥 thêm
+          params: { role }, 
         }
       );
 

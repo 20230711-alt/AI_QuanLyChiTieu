@@ -43,22 +43,18 @@ def get_all(user_id: int, db: Session = Depends(get_db)):
 
 @router.post("/")
 def create(data: schemas.GiaoDichCreate, db: Session = Depends(get_db)):
-    # =========================
-    # 👉 1. CHUẨN HÓA DANH MỤC
-    # =========================
+    #  1. CHUẨN HÓA DANH MỤC
     def capitalize_words(s: str):
         return " ".join(word.capitalize() for word in s.split())
 
     danh_muc = capitalize_words(data.danh_muc.strip())
 
-    # =========================
-    # 👉 2. LƯU GIAO DỊCH
-    # =========================
+    #  2. LƯU GIAO DỊCH
     gd = models.GiaoDich(
         user_id=data.user_id,
         loai=data.loai,
         so_tien=data.so_tien,
-        danh_muc=danh_muc,   # ✅ dùng bản đã chuẩn hóa
+        danh_muc=danh_muc,   
         mo_ta=data.mo_ta,
         ngay=data.ngay
     )
@@ -67,14 +63,12 @@ def create(data: schemas.GiaoDichCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(gd)
 
-    # =========================
-    # 👉 3. XỬ LÝ NGÂN SÁCH
-    # =========================
+    #  3. XỬ LÝ NGÂN SÁCH
+
     if data.loai.lower() == "chi":
 
         thang = data.ngay.strftime("%Y-%m")
 
-        # 🔥 FIX: so sánh LOWER để tránh duplicate
         ns = db.query(models.NganSach).filter(
             models.NganSach.user_id == data.user_id,
             models.NganSach.thang == thang,

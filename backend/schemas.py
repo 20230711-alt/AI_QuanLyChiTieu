@@ -42,11 +42,6 @@ class NganSachCreate(BaseModel):
     gioiHan: float
     thang: str
 
-
-# =====================================================
-#  THÊM MỤC TIÊU 
-# =====================================================
-
 #  tạo mục tiêu
 class MucTieuCreate(BaseModel):
     ten: str

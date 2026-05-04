@@ -4,7 +4,7 @@ from database import SessionLocal
 import models
 from collections import defaultdict
 from datetime import datetime
-from sqlalchemy import func  # 🔥 THÊM
+from sqlalchemy import func  
 
 router = APIRouter(prefix="/thongke", tags=["Thống kê"])
 
@@ -17,15 +17,12 @@ def get_db():
         db.close()
 
 
-# =========================
-# 👉 THỐNG KÊ (GIỮ NGUYÊN + THÊM FILTER)
-# =========================
+#  THỐNG KÊ 
 @router.get("/")
 def get_thong_ke(
     thang: str = None,
     user_id: int = 1,
 
-    # 🔥 THÊM
     time: str = None,
     mode: str = "month",
     from_date: str = None,
@@ -34,35 +31,24 @@ def get_thong_ke(
     db: Session = Depends(get_db)
 ):
 
-    # =========================
-    # 👉 fallback nếu không truyền tháng
-    # =========================
     if not thang:
         thang = datetime.now().strftime("%Y-%m")
 
-    # =========================
-    # 👉 lấy toàn bộ giao dịch user
-    # =========================
     data = db.query(models.GiaoDich).filter(
         models.GiaoDich.user_id == user_id
     ).all()
 
-    # =========================
-    # 👉 FILTER (GIỮ NGUYÊN + THÊM)
-    # =========================
     data_thang = []
 
     for i in data:
         if not i.ngay:
             continue
 
-        # 🔥 RANGE DATE (ƯU TIÊN CAO NHẤT)
         if from_date and to_date:
             if str(i.ngay) >= from_date and str(i.ngay) <= to_date:
                 data_thang.append(i)
             continue
 
-        # 🔥 FILTER MỚI
         if time:
             if mode == "day":
                 if str(i.ngay) == time:
@@ -77,21 +63,15 @@ def get_thong_ke(
                     data_thang.append(i)
 
         else:
-            # 🔥 GIỮ NGUYÊN LOGIC CŨ
             thang_gd = i.ngay.strftime("%Y-%m")
             if thang_gd == thang:
                 data_thang.append(i)
 
-    # =========================
-    # 👉 TÍNH TOÁN (GIỮ NGUYÊN)
-    # =========================
     tong_thu = sum(float(i.so_tien or 0) for i in data_thang if i.loai == "thu")
     tong_chi = sum(float(i.so_tien or 0) for i in data_thang if i.loai == "chi")
     so_du = tong_thu - tong_chi
 
-    # =========================
-    # 👉 CHI THEO DANH MỤC
-    # =========================
+    #  CHI THEO DANH MỤC
     chi_theo_danh_muc = defaultdict(float)
 
     for i in data_thang:
@@ -99,9 +79,7 @@ def get_thong_ke(
             key = i.danh_muc if i.danh_muc else "Khác"
             chi_theo_danh_muc[key] += float(i.so_tien or 0)
 
-    # =========================
-    # 👉 CHI THEO NGÀY
-    # =========================
+    #  CHI THEO NGÀY
     chi_theo_ngay = defaultdict(float)
 
     for i in data_thang:
@@ -109,12 +87,9 @@ def get_thong_ke(
             day = i.ngay.day
             chi_theo_ngay[day] += float(i.so_tien or 0)
 
-    # Debug log (ASCII-safe for Windows cp1252 encoding)
     print(f"===== DEBUG THONG KE | thang={thang} | total={len(data)} | filtered={len(data_thang)} =====")
 
-    # =========================
-    # 👉 LƯU DB (GIỮ NGUYÊN)
-    # =========================
+    #  LƯU DB (để phục vụ biểu đồ lịch sử) 
     tk = db.query(models.ThongKe).filter(
         models.ThongKe.user_id == user_id,
         models.ThongKe.thang == thang
@@ -135,10 +110,6 @@ def get_thong_ke(
         db.add(tk)
 
     db.commit()
-
-    # =========================
-    # 👉 RETURN (GIỮ NGUYÊN)
-    # =========================
     return {
         "tong_thu": tong_thu,
         "tong_chi": tong_chi,

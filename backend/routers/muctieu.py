@@ -15,9 +15,7 @@ def get_db():
         db.close()
 
 
-# =========================
-# 👉 GET ALL
-# =========================
+#  GET ALL
 @router.get("/")
 def get_all(db: Session = Depends(get_db)):
     data = db.query(models.MucTieu).all()
@@ -34,13 +32,10 @@ def get_all(db: Session = Depends(get_db)):
     ]
 
 
-# =========================
-# 👉 CREATE
-# =========================
+#  CREATE
 @router.post("/")
 def create(data: schemas.MucTieuCreate, db: Session = Depends(get_db)):
 
-    # ✅ parse deadline an toàn
     deadline = None
     if data.deadline and data.deadline != "":
         try:
@@ -64,7 +59,6 @@ def create(data: schemas.MucTieuCreate, db: Session = Depends(get_db)):
 
 
 #  THÊM TIỀN
-
 @router.put("/{id}/them-tien")
 def them_tien(id: int, data: schemas.ThemTien, db: Session = Depends(get_db)):
     mt = db.query(models.MucTieu).filter(models.MucTieu.id == id).first()
@@ -79,7 +73,6 @@ def them_tien(id: int, data: schemas.ThemTien, db: Session = Depends(get_db)):
     return mt
 
 #  UPDATE
-
 @router.put("/{id}")
 def update(id: int, data: schemas.MucTieuCreate, db: Session = Depends(get_db)):
     mt = db.query(models.MucTieu).filter(models.MucTieu.id == id).first()
@@ -87,7 +80,6 @@ def update(id: int, data: schemas.MucTieuCreate, db: Session = Depends(get_db)):
     if not mt:
         raise HTTPException(status_code=404, detail="Không tìm thấy")
 
-    # ✅ parse deadline an toàn
     deadline = None
     if data.deadline and data.deadline != "":
         try:
@@ -104,9 +96,7 @@ def update(id: int, data: schemas.MucTieuCreate, db: Session = Depends(get_db)):
     return mt
 
 
-# =========================
-# 👉 DELETE
-# =========================
+#  DELETE
 @router.delete("/{id}")
 def delete(id: int, db: Session = Depends(get_db)):
     mt = db.query(models.MucTieu).filter(models.MucTieu.id == id).first()
@@ -119,9 +109,7 @@ def delete(id: int, db: Session = Depends(get_db)):
     return {"message": "Đã xóa"}
 
 
-# =========================
-# 👉 🆕 LẤY SỐ DƯ (TỪ GIAO DỊCH)
-# =========================
+#  LẤY SỐ DƯ (TỪ GIAO DỊCH)
 @router.get("/so-du")
 def get_so_du(db: Session = Depends(get_db)):
     thu = db.query(models.GiaoDich).filter(models.GiaoDich.loai == "thu").all()

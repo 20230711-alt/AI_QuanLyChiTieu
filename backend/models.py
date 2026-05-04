@@ -45,7 +45,7 @@ class ThongKe(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer)
-    thang = Column(String(7))  # yyyy-mm
+    thang = Column(String(7))  
     tong_thu = Column(Float, default=0)
     tong_chi = Column(Float, default=0)
     so_du = Column(Float, default=0)

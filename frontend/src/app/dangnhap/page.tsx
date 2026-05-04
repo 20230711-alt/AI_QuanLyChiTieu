@@ -10,13 +10,13 @@ export default function DangNhapPage() {
   const [username, setUsername] = useState("");
   const [matKhau, setMatKhau] = useState("");
 
-  // ✅ thêm state lỗi
+  //  thêm state lỗi
   const [error, setError] = useState("");
 
   const handleLogin = async (e: any) => {
     e.preventDefault();
 
-    // 🔥 VALIDATE
+    //  VALIDATE
     if (!username || !matKhau) {
       setError("⚠️ Vui lòng nhập đầy đủ thông tin!");
       return;
@@ -79,7 +79,7 @@ export default function DangNhapPage() {
           TRUY CẬP TÀI KHOẢN
         </button>
 
-        {/* ✅ HIỂN THỊ LỖI */}
+        {/*  HIỂN THỊ LỖI */}
         {error && (
           <p className="text-red-500 text-sm mt-3 text-center">
             {error}
