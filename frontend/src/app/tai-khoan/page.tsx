@@ -64,7 +64,7 @@ export default function TaiKhoanPage() {
       const data = await res.json();
       if (data.message === "Cập nhật thành công") {
         setMessage("✅ Cập nhật thông tin thành công!");
-        setInitialForm(form);
+        setInitialForm(form); // lâY lại dữ liệu mới làm chuẩn để so sánh
       } else {
         setMessage("❌ Cập nhật thất bại.");
       }
