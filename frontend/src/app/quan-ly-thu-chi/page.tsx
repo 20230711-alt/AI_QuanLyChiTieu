@@ -46,7 +46,9 @@ export default function ThuChiPage() {
 
   // LOAD DATA
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/giaodich/?user_id=1")
+    const userId = localStorage.getItem("user_id");
+    if (!userId) return;
+    fetch(`http://127.0.0.1:8000/giaodich/?user_id=${userId}`)
       .then(res => res.json())
       .then(data => {
         const mapped = data.map((i: any) => ({
@@ -70,6 +72,7 @@ export default function ThuChiPage() {
 
     try {
       console.log("Gửi lên:", form.loai); // DEBUG
+      const userId = localStorage.getItem("user_id") || "1";
 
       await fetch("http://127.0.0.1:8000/giaodich/", {
         method: "POST",
@@ -77,7 +80,7 @@ export default function ThuChiPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: 1,
+          user_id: Number(userId),
           loai: form.loai,
           so_tien: Number(form.soTien),
           danh_muc: form.danhMuc,
@@ -86,7 +89,7 @@ export default function ThuChiPage() {
         }),
       });
 
-      const res = await fetch("http://127.0.0.1:8000/giaodich/?user_id=1");
+      const res = await fetch(`http://127.0.0.1:8000/giaodich/?user_id=${userId}`);
       const data = await res.json();
 
       const mapped = data.map((i: any) => ({
@@ -132,6 +135,7 @@ export default function ThuChiPage() {
 
   const saveEdit = async () => {
   if (!editing) return;
+  const userId = localStorage.getItem("user_id") || "1";
 
   await fetch(`http://127.0.0.1:8000/giaodich/${editing.id}`, {
     method: "PUT",
@@ -139,7 +143,7 @@ export default function ThuChiPage() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      user_id: 1,
+      user_id: Number(userId),
       loai: editing.loai,
       so_tien: editing.soTien,
       danh_muc: editing.danhMuc,
@@ -149,7 +153,7 @@ export default function ThuChiPage() {
   });
 
   // reload lại từ server 
-  const res = await fetch("http://127.0.0.1:8000/giaodich/?user_id=1");
+  const res = await fetch(`http://127.0.0.1:8000/giaodich/?user_id=${userId}`);
   const data = await res.json();
 
   const mapped = data.map((i: any) => ({

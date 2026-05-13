@@ -9,7 +9,17 @@ import {
 } from "lucide-react";
 
 export default function AIGoiYPage() {
-  // Tạm thời hardcode user_id = 1 giống các trang khác
+  const [userId, setUserId] = useState<number | null>(null);
+  
+  useEffect(() => {
+    const id = localStorage.getItem("user_id");
+    if (id) {
+      setUserId(Number(id));
+    } else {
+      setUserId(1); // fallback
+    }
+  }, []);
+
   const { 
     data, 
     loading, 
@@ -17,7 +27,7 @@ export default function AIGoiYPage() {
     chatMessages, 
     chatLoading, 
     sendMessage 
-  } = useFinancialAnalysis(1);
+  } = useFinancialAnalysis(userId);
 
   const [inputMsg, setInputMsg] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -35,6 +45,10 @@ export default function AIGoiYPage() {
     sendMessage(inputMsg);
     setInputMsg("");
   };
+
+  if (!userId) {
+    return null; // wait for client side mounting
+  }
 
   if (loading) {
     return (

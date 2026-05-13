@@ -53,7 +53,7 @@ export interface ChatMessage {
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
-export function useFinancialAnalysis(userId: number) {
+export function useFinancialAnalysis(userId: number | null) {
   const [data, setData] = useState<AnalysisData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +70,7 @@ export function useFinancialAnalysis(userId: number) {
 
   /** Fetch financial analysis from backend */
   const fetchAnalysis = useCallback(async () => {
+    if (!userId) return;
     setLoading(true);
     setError(null);
     try {
@@ -87,6 +88,7 @@ export function useFinancialAnalysis(userId: number) {
   /** Send a chat message to AI */
   const sendMessage = useCallback(
     async (message: string) => {
+      if (!userId) return;
       const userMsg: ChatMessage = {
         role: "user",
         content: message,

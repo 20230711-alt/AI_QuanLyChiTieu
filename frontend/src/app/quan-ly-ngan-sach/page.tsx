@@ -48,15 +48,17 @@ export default function NganSachPage() {
   // LOAD DATA
   useEffect(() => {
     const load = () => {
+      const userId = localStorage.getItem("user_id") || "1";
       const query = getQuery();
 
-      fetch(
-        fromDate && toDate
-          ? `http://127.0.0.1:8000/ngansach?from_date=${fromDate}&to_date=${toDate}`
-          : query
-          ? `http://127.0.0.1:8000/ngansach?time=${query}&mode=${mode}`
-          : "http://127.0.0.1:8000/ngansach"
-      )
+      let url = `http://127.0.0.1:8000/ngansach?user_id=${userId}`;
+      if (fromDate && toDate) {
+        url += `&from_date=${fromDate}&to_date=${toDate}`;
+      } else if (query) {
+        url += `&time=${query}&mode=${mode}`;
+      }
+
+      fetch(url)
         .then((res) => res.json())
         .then((data) => {
           if (!Array.isArray(data)) return;
@@ -83,7 +85,9 @@ export default function NganSachPage() {
 
   // LOAD NGÀY CÓ CHI TIÊU
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/giaodich?user_id=1")
+    const userId = localStorage.getItem("user_id");
+    if (!userId) return;
+    fetch(`http://127.0.0.1:8000/giaodich?user_id=${userId}`)
       .then((res) => res.json())
       .then((data) => {
         const days = data.map((i: any) => i.ngay);
@@ -120,19 +124,20 @@ export default function NganSachPage() {
     if (!ten || !gioiHan) return;
 
     const parsed = Number(gioiHan.replace(/\./g, ""));
+    const userId = localStorage.getItem("user_id") || "1";
 
     try {
       if (editingId !== null) {
         await fetch(`http://127.0.0.1:8000/ngansach/${editingId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ten, gioiHan: parsed, thang }),
+          body: JSON.stringify({ user_id: Number(userId), ten, gioiHan: parsed, thang }),
         });
       } else {
         await fetch("http://127.0.0.1:8000/ngansach", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ten, gioiHan: parsed, thang }),
+          body: JSON.stringify({ user_id: Number(userId), ten, gioiHan: parsed, thang }),
         });
       }
 

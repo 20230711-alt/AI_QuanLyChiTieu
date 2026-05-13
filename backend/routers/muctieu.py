@@ -17,8 +17,8 @@ def get_db():
 
 #  GET ALL
 @router.get("/")
-def get_all(db: Session = Depends(get_db)):
-    data = db.query(models.MucTieu).all()
+def get_all(user_id: int = 1, db: Session = Depends(get_db)):
+    data = db.query(models.MucTieu).filter(models.MucTieu.user_id == user_id).all()
 
     return [
         {
@@ -44,7 +44,7 @@ def create(data: schemas.MucTieuCreate, db: Session = Depends(get_db)):
             raise HTTPException(status_code=400, detail="Sai định dạng ngày (yyyy-mm-dd)")
 
     mt = models.MucTieu(
-        user_id=1,
+        user_id=data.user_id or 1,
         ten=data.ten,
         muc_tieu=float(data.muc_tieu),
         da_dat=0,
@@ -111,9 +111,9 @@ def delete(id: int, db: Session = Depends(get_db)):
 
 #  LẤY SỐ DƯ (TỪ GIAO DỊCH)
 @router.get("/so-du")
-def get_so_du(db: Session = Depends(get_db)):
-    thu = db.query(models.GiaoDich).filter(models.GiaoDich.loai == "thu").all()
-    chi = db.query(models.GiaoDich).filter(models.GiaoDich.loai == "chi").all()
+def get_so_du(user_id: int = 1, db: Session = Depends(get_db)):
+    thu = db.query(models.GiaoDich).filter(models.GiaoDich.loai == "thu", models.GiaoDich.user_id == user_id).all()
+    chi = db.query(models.GiaoDich).filter(models.GiaoDich.loai == "chi", models.GiaoDich.user_id == user_id).all()
 
     tong_thu = sum(i.so_tien for i in thu)
     tong_chi = sum(i.so_tien for i in chi)

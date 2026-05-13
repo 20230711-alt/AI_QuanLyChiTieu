@@ -18,33 +18,35 @@ def get_db():
 def get_all(
     time: str = None,
     mode: str = "month",
-
     from_date: str = None,
     to_date: str = None,
-
+    user_id: int = 1,
     db: Session = Depends(get_db)
 ):
     result = []
 
+    base_query = db.query(models.NganSach).filter(models.NganSach.user_id == user_id)
+
     if time and mode == "month":
-        ns_list = db.query(models.NganSach).filter(
+        ns_list = base_query.filter(
             models.NganSach.thang == time
         ).all()
 
     elif time and mode == "year":
-        ns_list = db.query(models.NganSach).filter(
+        ns_list = base_query.filter(
             models.NganSach.thang.startswith(time)
         ).all()
 
     else:
-        ns_list = db.query(models.NganSach).all()
+        ns_list = base_query.all()
 
     for ns in ns_list:
 
         query = db.query(func.sum(models.GiaoDich.so_tien))\
             .filter(
                 models.GiaoDich.danh_muc == ns.danh_muc,
-                models.GiaoDich.loai == "chi"
+                models.GiaoDich.loai == "chi",
+                models.GiaoDich.user_id == user_id
             )
 
         if from_date and to_date:
@@ -83,7 +85,7 @@ def get_all(
 @router.post("/")
 def create(data: schemas.NganSachCreate, db: Session = Depends(get_db)):
     ns = models.NganSach(
-        user_id=1,
+        user_id=getattr(data, 'user_id', 1),
         danh_muc=data.ten,
         gioi_han=data.gioiHan,
         thang=data.thang

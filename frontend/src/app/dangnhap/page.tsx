@@ -37,9 +37,12 @@ export default function DangNhapPage() {
         localStorage.setItem("isLogin", "true");
         localStorage.setItem("role", res.role);
         localStorage.setItem("username", username);
+        if (res.id) {
+          localStorage.setItem("user_id", res.id.toString());
+        }
 
         setError(""); // clear lỗi
-        router.push("/");
+        window.location.href = "/";
       } else {
         setError(res.message);
       }

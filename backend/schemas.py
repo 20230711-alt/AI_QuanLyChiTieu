@@ -38,12 +38,14 @@ class GiaoDichOut(GiaoDichCreate):
 
 
 class NganSachCreate(BaseModel):
+    user_id: Optional[int] = 1
     ten: str
     gioiHan: float
     thang: str
 
 #  tạo mục tiêu
 class MucTieuCreate(BaseModel):
+    user_id: Optional[int] = 1
     ten: str
     muc_tieu: float
     deadline: Optional[str] = None
@@ -65,6 +67,7 @@ class MucTieuOut(BaseModel):
     class Config:
         from_attributes = True
 class NhacNhoCreate(BaseModel):
+    user_id: Optional[int] = 1
     noi_dung: str
     ngay: date
     lap_lai: bool = False

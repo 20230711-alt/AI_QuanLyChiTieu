@@ -32,7 +32,8 @@ export default function MucTieuPage() {
   // LOAD MỤC TIÊU
   const load = async () => {
     try {
-      const res = await fetch(API);
+      const userId = localStorage.getItem("user_id") || "1";
+      const res = await fetch(`${API}?user_id=${userId}`);
 
       if (!res.ok) {
         console.error("API lỗi:", await res.text());
@@ -64,7 +65,8 @@ export default function MucTieuPage() {
   // LOAD SỐ DƯ
   const loadSoDu = async () => {
     try {
-      const res = await fetch(API + "so-du");
+      const userId = localStorage.getItem("user_id") || "1";
+      const res = await fetch(`${API}so-du?user_id=${userId}`);
 
       if (!res.ok) {
         console.error("API số dư lỗi:", await res.text());
@@ -90,7 +92,9 @@ export default function MucTieuPage() {
     }
 
     try {
+      const userId = localStorage.getItem("user_id") || "1";
       const body: any = {
+        user_id: Number(userId),
         ten,
         muc_tieu: Number(soTien),
       };

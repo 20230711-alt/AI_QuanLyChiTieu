@@ -80,9 +80,11 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     if db_user.password != user.password:
         return {"message": "Sai mật khẩu"}
 
-    return {"message": "Đăng nhập thành công",
-            "role": db_user.role
-            }
+    return {
+        "message": "Đăng nhập thành công",
+        "role": db_user.role,
+        "id": db_user.id
+    }
 #  ADMIN - LẤY DANH SÁCH USER
 @app.get("/admin/users")
 def get_users(role: str, db: Session = Depends(get_db)):

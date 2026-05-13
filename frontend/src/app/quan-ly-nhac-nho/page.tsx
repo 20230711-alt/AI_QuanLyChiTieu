@@ -27,7 +27,8 @@ export default function NhacNhoPage() {
   const API = "http://127.0.0.1:8000/nhacnho";
 
   const fetchData = async () => {
-    const res = await fetch(API);
+    const userId = localStorage.getItem("user_id") || "1";
+    const res = await fetch(`${API}?user_id=${userId}`);
     const data = await res.json();
     setList(data);
   };
@@ -39,12 +40,15 @@ export default function NhacNhoPage() {
   const handleAdd = async () => {
     if (!noiDung || !ngay) return;
 
+    const userId = localStorage.getItem("user_id") || "1";
+
     await fetch(API + "/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        user_id: Number(userId),
         noi_dung: noiDung,
         ngay: ngay,
         lap_lai: lapLai,

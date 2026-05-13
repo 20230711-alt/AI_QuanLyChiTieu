@@ -103,9 +103,8 @@ export default function RootLayout({
               <div className="mt-4">
                 <button
                   onClick={() => {
-                    localStorage.removeItem("isLogin");
-                    localStorage.removeItem("role");
-                    router.push("/dangnhap");
+                    localStorage.clear();
+                    window.location.href = "/dangnhap";
                   }}
                   className="w-full bg-gradient-to-r from-purple-400 to-indigo-500 hover:opacity-90 py-2.5 rounded-xl font-semibold shadow-md transition"
                 >

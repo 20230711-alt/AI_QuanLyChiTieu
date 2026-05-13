@@ -19,8 +19,9 @@ def get_db():
 #  1. Tạo nhắc nhở
 @router.post("/")
 def create_reminder(data: NhacNhoCreate, db: Session = Depends(get_db)):
+    # schema might not have user_id yet, let's fix it after
     new_item = NhacNho(
-        user_id=1,
+        user_id=getattr(data, 'user_id', 1),
         noi_dung=data.noi_dung,
         ngay=data.ngay,
         lap_lai=data.lap_lai
@@ -32,22 +33,22 @@ def create_reminder(data: NhacNhoCreate, db: Session = Depends(get_db)):
 
 #  2. Lấy tất cả
 @router.get("/")
-def get_all(db: Session = Depends(get_db)):
-    return db.query(NhacNho).order_by(NhacNho.ngay).all()
+def get_all(user_id: int = 1, db: Session = Depends(get_db)):
+    return db.query(NhacNho).filter(NhacNho.user_id == user_id).order_by(NhacNho.ngay).all()
 
 #  3. Nhắc hôm nay
 @router.get("/today")
-def get_today(db: Session = Depends(get_db)):
+def get_today(user_id: int = 1, db: Session = Depends(get_db)):
     today = date.today()
-    return db.query(NhacNho).filter(NhacNho.ngay == today).all()
+    return db.query(NhacNho).filter(NhacNho.ngay == today, NhacNho.user_id == user_id).all()
 
 #  4. Nhắc sắp tới (3 ngày)
 @router.get("/upcoming")
-def upcoming(db: Session = Depends(get_db)):
+def upcoming(user_id: int = 1, db: Session = Depends(get_db)):
     today = date.today()
     future = today + timedelta(days=3)
     return db.query(NhacNho).filter(
-        NhacNho.ngay.between(today, future)
+        NhacNho.ngay.between(today, future), NhacNho.user_id == user_id
     ).all()
 
 #  5. Đánh dấu hoàn thành

@@ -30,9 +30,12 @@ export default function Dashboard() {
 
   // LOAD DATA
   useEffect(() => {
+    const userId = localStorage.getItem("user_id");
+    if (!userId) return;
+
     const load = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/giaodich?user_id=1");
+        const res = await fetch(`http://127.0.0.1:8000/giaodich?user_id=${userId}`);
         const data = await res.json();
 
         if (!Array.isArray(data)) return;

@@ -41,7 +41,8 @@ export default function ThongKePage() {
   const format = (n: number) => n.toLocaleString("vi-VN");
 
   const buildQuery = () => {
-    let url = `${API}?user_id=1`;
+    const userId = localStorage.getItem("user_id") || "1";
+    let url = `${API}?user_id=${userId}`;
 
     if (fromDate && toDate) {
       url += `&from_date=${fromDate}&to_date=${toDate}`;
